@@ -13,6 +13,9 @@ from tavily import TavilyClient
 
 load_dotenv()
 
+tavily_api_key = os.getenv("TAVILY_API_KEY")
+tavily = TavilyClient(api_key = tavily_api_key)
+
 @tool
 def tavily_search_tool(query: str) -> str:
     """

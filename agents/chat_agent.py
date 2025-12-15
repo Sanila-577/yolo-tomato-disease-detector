@@ -12,3 +12,23 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from tavily import TavilyClient
 
 load_dotenv()
+
+def chat_agent(state: AgentState) -> AgentState:
+    system_prompt = SystemMessage(
+        content="You are a friendly assistant. Respond naturally."
+    )
+
+    # last user message
+    user_message = state["messages"][-1]
+
+    # invoke LLM
+    response = llm.invoke([system_prompt, user_message])
+
+    # append AI response to state messages
+    state["messages"] = state["messages"] + [response]
+
+    state['final_answer'] = response.content
+
+    print("💬 Chat response generated")
+    return state
+
