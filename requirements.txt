@@ -9,3 +9,4 @@ pypdf
 cryptography
 sentence-transformers
 faiss-cpu
+streamlit

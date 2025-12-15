@@ -4,9 +4,8 @@ from agents.router_agent import router_agent
 from agents.chat_agent import chat_agent
 from agents.retriever_agent import retrieve_agent
 from agents.web_agent import web_answer_agent
-from agents.grader_agent import unified_grader_answer_agent
+from agents.grader_answer_agent import unified_grader_answer_agent
 
-load_dotenv()
 
 def build_graph():
     graph = StateGraph(AgentState)
@@ -35,12 +34,11 @@ def build_graph():
 
     graph.add_conditional_edges(
         "grader_answer_generator",
-        lambda s: f"{s['route']}_{s['enough_info']}",  # string key
+        lambda s: s.get("enough_info"),
         {
-            "rag_False": "web_scraper",
-            "rag_True": END,
-            "web_False": END,
-            "web_True": END
+            True: END,              # RAG had enough info
+            False: "web_scraper",   # RAG fallback to web
+            None: END               # Web skip grading
         }
     )
 

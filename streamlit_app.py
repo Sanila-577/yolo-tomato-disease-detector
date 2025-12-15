@@ -30,8 +30,5 @@ if user_input:
     st.session_state.messages.append(AIMessage(content=final_answer))
 
 for msg in st.session_state.messages:
-    if isinstance(msg, HumanMessage):
+    if isinstance(msg, AIMessage):
         st.markdown(f"**🧑 You:** {msg.content}")
-
-    else:
-        st.markdown(f"**🤖 Bot:** {msg.content}")
