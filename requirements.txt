@@ -1,0 +1,11 @@
+langchain-core
+langchain-openai
+langgraph
+python-dotenv
+langchain
+langchain_community
+tavily-python
+pypdf
+cryptography
+sentence-transformers
+faiss-cpu
