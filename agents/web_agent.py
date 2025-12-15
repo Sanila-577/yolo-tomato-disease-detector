@@ -10,6 +10,9 @@ from langgraph.prebuilt import ToolNode
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from tavily import TavilyClient
+from tools.tavily_search_tool import tavily_search_tool
+from agents.state import AgentState
+from core.llm import llm
 
 load_dotenv()
 
@@ -53,6 +56,8 @@ def web_answer_agent(state: AgentState) -> AgentState:
 
     # Step 3 — Store web results separately
     state["web_retrievals"] = tool_outputs
+
+    print(state)
 
     print("🌐 Web Answer Agent Completed")
     return state
