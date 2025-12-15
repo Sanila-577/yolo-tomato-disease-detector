@@ -27,3 +27,6 @@ def run():
         
         print("\n=== ANSWER ===")
         print(result['final_answer'])
+
+if __name__ == "__main__":
+    run()
