@@ -1,14 +1,29 @@
-from typing import TypedDict, Annotated, Sequence, Optional, List, Literal
-from langchain_core.messages import BaseMessage, ToolMessage, SystemMessage, HumanMessage
-from langchain_openai import ChatOpenAI
-from langgraph.graph import StateGraph, START, END
-from langgraph.graph.message import add_messages
-from dotenv import load_dotenv
-import os
-from langchain_core.tools import tool
-from langgraph.prebuilt import ToolNode
+from core.build_graph import build_graph
+from langchain_core.messages import HumanMessage
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from tavily import TavilyClient
+app = build_graph()
 
-load_dotenv()
+def run():
+    print("\n=== RAG AGENT===")
+    
+    while True:
+        user_input = input("\nWhat is your question: ")
+        if user_input.lower() in ['exit', 'quit']:
+            break
+            
+        messages = [HumanMessage(content=user_input)] # converts back to a HumanMessage type
+
+        result = app.invoke(
+            {
+                "question": user_input,
+                "messages": [HumanMessage(content=user_input)],
+                "route": None,
+                "retrieved_docs": [],
+                "web_retrievals": [],
+                "enough_info": None,
+                "final_answer": None
+            }
+        )
+        
+        print("\n=== ANSWER ===")
+        print(result['final_answer'])
