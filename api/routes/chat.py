@@ -17,7 +17,7 @@ async def chat_endpoint(req: ChatRequest):
         system_prompt = (
             f"The plant disease detected is {req.detected_disease}. "
             f"Provide accurate, agriculture-safe guidance. "
-            f"If unsure, say so."
+         
         )
         answer, messages = run_graph(system_prompt, messages)
 

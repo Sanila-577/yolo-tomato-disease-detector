@@ -1,5 +1,5 @@
 import streamlit as st
-from core.run_agent import app
+from core.run_graph import app
 from langchain_core.messages import HumanMessage, AIMessage
 
 # —————— THEME HANDLING ——————
