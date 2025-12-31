@@ -1,9 +1,12 @@
 from pathlib import Path
 from ultralytics import YOLO
 
-MODEL_PATH = Path("models/tomato_leaf_disease_detector_v1.pt")
+BASE_DIR = Path(__file__).resolve().parents[1]
+MODEL_PATH = BASE_DIR / "models" / "tomato_leaf_disease_detector_v1.pt"
 
-# Load the model once at startup
+if not MODEL_PATH.exists():
+    raise FileNotFoundError(f"YOLO model not found at {MODEL_PATH}")
+
 yolo_model = YOLO(str(MODEL_PATH))
 
 # This file keeps preventing reloading model on every request
