@@ -1,14 +1,18 @@
 from core.build_graph import build_graph
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 app = build_graph()
 
-def run_graph(user_input:str, messages=None):
-
+def run_graph(user_input: str, messages=None, system_context: str | None = None):
     if messages is None:
         messages = []
-            
-    messages.append([HumanMessage(content=user_input)])# converts back to a HumanMessage type
+
+    # Inject system context ONCE
+    if system_context and not any(isinstance(m, SystemMessage) for m in messages):
+        messages.append(SystemMessage(content=system_context))
+
+    # Append user message (✅ FIXED)
+    messages.append(HumanMessage(content=user_input))
 
     result = app.invoke(
         {
@@ -21,10 +25,8 @@ def run_graph(user_input:str, messages=None):
             "final_answer": None
         }
     )
-    
-    print("\n=== ANSWER ===")
-    print(result['final_answer'])
 
+    # Append AI response
     messages.append(AIMessage(content=result["final_answer"]))
-    return result["final_answer"], messages
 
+    return result["final_answer"], messages

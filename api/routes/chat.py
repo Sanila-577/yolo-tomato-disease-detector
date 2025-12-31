@@ -8,22 +8,33 @@ CHAT_MEMORY = {}
 
 @router.post("", response_model=ChatResponse)
 async def chat_endpoint(req: ChatRequest):
-    session_id = "default"  # later replace with user/session ID
+    # 🔴 HARD-CODED TEST QUESTION
+    test_question = "What is the treatment for tomato early blight?"
 
+    session_id = "default"  # later replace with real session/user ID
     messages = CHAT_MEMORY.get(session_id, [])
 
-    # Inject disease context ONLY once
-    if req.is_first_message and req.detected_disease:
-        system_prompt = (
-            f"The plant disease detected is {req.detected_disease}. "
-            f"Provide accurate, agriculture-safe guidance. "
-         
-        )
-        answer, messages = run_graph(system_prompt, messages)
 
-    # Normal user message
-    answer, messages = run_graph(req.message, messages)
+    system_context = None
+    user_question = req.message
+
+    # First interaction after disease detection
+    if req.is_first_message and req.detected_disease:
+        system_context = (
+            f"The plant disease detected is {req.detected_disease}. "
+            f"You are an agricultural assistant. "
+            f"Give accurate, safe, and practical advice."
+        )
+
+        # If frontend sends empty message, auto-generate first question
+        if not user_question.strip():
+            user_question = f"What is the treatment for {req.detected_disease}?"
+
+    answer, messages = run_graph(
+        user_input=user_question,
+        messages=messages,
+        system_context=system_context
+    )
 
     CHAT_MEMORY[session_id] = messages
-
     return ChatResponse(answer=answer)
