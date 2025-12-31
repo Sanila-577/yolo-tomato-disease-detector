@@ -2,13 +2,16 @@ from fastapi import APIRouter, UploadFile, File
 import uuid
 from pathlib import Path
 
+from vision.inference import run_inference
+from vision.utils import draw_boxes
+from api.schemas.vision_schema import VisionResponse
 
 router = APIRouter(prefix="/detect", tags=["Detect"])
 
 OUTPUT_DIR = Path("static/outputs")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-@router.post("")
+@router.post("", response_model= VisionResponse)
 async def detect_disease(file: UploadFile = File(...) ):
     image_bytes = await file.read()
     detections,image = run_inference(image_bytes)
@@ -20,11 +23,10 @@ async def detect_disease(file: UploadFile = File(...) ):
 
     diseases = list({d["label"] for d in detections})
 
-    return {
-        "detected_diseases": diseases,
-        "boxes": detections,
-        "annotated_image": f"/static/outputs/{file_name}"
-    
-    }
+    return VisionResponse(
+        detected_disease = diseases,
+        boxes=detections,
+        annotated_image = f"/static/outputs/{file_name}"
+    )
 
 
