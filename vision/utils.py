@@ -23,10 +23,18 @@ def draw_boxes(image, detections: List[dict]):
     return image
 
 def save_output_image(image, filename: str):
+    if image is None:
+        raise ValueError("Cannot save empty image")
+
     output_dir = Path("outputs")
     output_dir.mkdir(exist_ok=True)
+
     output_path = output_dir / filename
-    cv2.imwrite(str(output_path), image)
+    success = cv2.imwrite(str(output_path), image)
+
+    if not success:
+        raise RuntimeError("cv2.imwrite failed")
+
     return str(output_path)
 
 
