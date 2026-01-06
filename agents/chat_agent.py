@@ -17,14 +17,17 @@ load_dotenv()
 
 def chat_agent(state: AgentState) -> AgentState:
     system_prompt = SystemMessage(
-        content="You are a friendly assistant. Respond naturally."
+        content="""You are a friendly agricultural assistant. 
+        You have access to the detected disease information in the conversation context.
+        When answering questions, reference the disease name and use the context provided.
+        Respond naturally and helpfully."""
     )
 
-    # last user message
-    user_message = state["messages"][-1]
+    # Use all messages (which includes system context with disease info)
+    messages = [system_prompt] + state["messages"]
 
     # invoke LLM
-    response = llm.invoke([system_prompt, user_message])
+    response = llm.invoke(messages)
 
     # append AI response to state messages
     state["messages"] = state["messages"] + [response]
