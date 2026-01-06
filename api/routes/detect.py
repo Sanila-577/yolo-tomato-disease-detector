@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Request
 import uuid
 from pathlib import Path
 import cv2
@@ -14,7 +14,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("", response_model=VisionResponse)
-async def detect_disease(file: UploadFile = File(...)):
+async def detect_disease(request: Request, file: UploadFile = File(...)):
     # 1️⃣ Read image bytes from request
     image_bytes = await file.read()
 
@@ -33,9 +33,11 @@ async def detect_disease(file: UploadFile = File(...)):
 
     cv2.imwrite(str(output_path), annotated_img)
 
+    image_url = f"{request.base_url}static/outputs/{file_name}"
+
     # 5️⃣ Return validated response
     return VisionResponse(
         detected_disease=detected_disease,
         detections=detections,
-        output_image_path=f"/static/outputs/{file_name}"
+        output_image_path=image_url
     )

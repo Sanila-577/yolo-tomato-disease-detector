@@ -16,6 +16,7 @@ streamlit
 # ----------------------------
 fastapi
 uvicorn[standard]
+fastapi[standard]
 python-multipart
 pydantic
 python-dotenv
