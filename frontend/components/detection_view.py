@@ -1,12 +1,15 @@
 import streamlit as st
+from frontend.services.detection_service import detect_disease
 
 def show_detection(image_file):
-    st.subheader("Detection Result")
+    st.subheader("🔍 Detection Result")
+
     result = detect_disease(image_file)
+    st.write(result)
 
-    st.image(result["annotated_image"],
-             caption="Detected disease" )
-    st.success(f"Detected: {','.join(result['detected_diseases'])}")
+    # Correct keys
+    st.image(result["output_image_path"], caption="Detected Diseases")
+    st.success(f"Detected: {result['detected_disease']}")
+    
 
-    return result["detected_disease"][0]
-
+    return result["detected_disease"]
