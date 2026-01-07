@@ -10,3 +10,26 @@ cryptography
 sentence-transformers
 faiss-cpu
 streamlit
+
+# ----------------------------
+# Core Backend
+# ----------------------------
+fastapi
+uvicorn[standard]
+fastapi[standard]
+python-multipart
+pydantic
+python-dotenv
+
+# ----------------------------
+# Computer Vision (YOLO)
+# ----------------------------
+ultralytics
+opencv-python
+pillow
+numpy
+
+# ----------------------------
+# Utilities
+# ----------------------------
+requests
