@@ -21,16 +21,63 @@ FastAPI + LangGraph backend with a Streamlit frontend for tomato leaf disease de
 ## 🗂️ Project Structure (high level)
 
 ```
-agents/              # router, chat, retriever, web, grader agents
-api/                 # FastAPI app, chat & detect routes
-core/                # LangGraph build/run, FAISS setup, LLM config
-frontend/            # Streamlit UI (app.py), components, services, styles
-vision/              # YOLO inference and utilities
-models/              # YOLO weights
-faiss_db/            # FAISS index
-static/outputs/      # Annotated images from detection
-data/                # Dataset samples
-readme.md, requirements.txt, start.sh, Dockerfile
+agents/                    # LangGraph agents
+  ├── router_agent.py      # Routes queries (chat/RAG/web)
+  ├── chat_agent.py        # Conversational agent
+  ├── retriever_agent.py   # RAG retriever over FAISS
+  ├── web_agent.py         # Web search fallback (Tavily)
+  ├── grader_answer_agent.py # Grades answer relevance
+  ├── state.py             # Agent state management
+  └── __init__.py
+api/                       # FastAPI backend
+  ├── main.py              # FastAPI app
+  ├── routes/
+  │   ├── chat.py          # /chat endpoint
+  │   ├── detect.py        # /detect endpoint
+  │   └── health.py        # /health endpoint
+  ├── schemas/
+  │   ├── chat_schema.py
+  │   └── vision_schema.py
+  ├── static/outputs/      # Annotated images from detection
+  └── __init__.py
+core/                      # Core logic & LangGraph
+  ├── build_graph.py       # Construct LangGraph workflow
+  ├── run_graph.py         # Execute graph
+  ├── faiss_setup.py       # FAISS index initialization
+  ├── llm.py               # LLM configuration
+  └── __init__.py
+frontend/                  # Streamlit UI
+  ├── app.py               # Main app entry
+  ├── config.py            # Configuration
+  ├── state.py             # Session state management
+  ├── components/
+  │   ├── chat_ui.py       # Chat interface
+  │   └── detection_view.py # Detection preview
+  ├── services/
+  │   ├── chat_service.py  # Chat API calls
+  │   └── detection_service.py # Detection API calls
+  └── __init__.py
+vision/                    # YOLO inference
+  ├── inference.py         # Run inference
+  ├── model.py             # Model loading
+  ├── utils.py             # Vision utilities
+  └── __init__.py
+tools/                     # Tool integrations
+  ├── retriever_tool.py    # FAISS retrieval
+  ├── tavily_search_tool.py # Web search
+  └── __init__.py
+models/                    # Pre-trained weights
+  └── tomato_leaf_disease_detector_v1.pt
+faiss_db/                  # Vector store index
+  └── index.faiss
+data/                      # Training data
+  └── dataset/             # Roboflow dataset (YOLO format)
+      ├── train/
+      ├── valid/
+      └── test/
+static/outputs/            # Generated annotated images
+docs/                      # Documentation
+readme.md, requirements.txt
 ```
 
 ---
