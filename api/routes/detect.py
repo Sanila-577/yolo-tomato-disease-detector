@@ -3,6 +3,7 @@ import uuid
 from pathlib import Path
 import numpy as np
 import cv2
+import base64
 
 from vision.inference import run_yolo_inference
 from vision.utils import draw_boxes
@@ -47,20 +48,23 @@ async def detect_disease(request: Request, file: UploadFile = File(...)):
     annotated_img = draw_boxes(image, detections)
 
     # 4️⃣ Save annotated image using OpenCV
-    file_name = f"{uuid.uuid4()}.jpg"
-    output_path = OUTPUT_DIR / file_name
+    # file_name = f"{uuid.uuid4()}.jpg"
+    # output_path = OUTPUT_DIR / file_name
 
     if annotated_img is None:
         raise ValueError("Annotated image is empty")
+    
+    _, buffer = cv2.imencode('.jpg',annotated_img)
+    base64_image = base64.b64encode(buffer).decode('utf-8')
 
-    cv2.imwrite(str(output_path), annotated_img)
+    # cv2.imwrite(str(output_path), annotated_img)
 
-    image_url = f"{request.base_url}static/outputs/{file_name}"
+    # image_url = f"{request.base_url}static/outputs/{file_name}"
 
     # 5️⃣ Return validated response
     return VisionResponse(
         detected_disease=detected_disease,
         detections=detections,
-        output_image_path=image_url,
+        output_image_path=f"data:image/jpeg;base64,{base64_image}",
         report=report
     )

@@ -1,19 +1,43 @@
+import base64
+from io import BytesIO
 from typing import Optional, Dict
 
 import streamlit as st
 from frontend.services.detection_service import detect_disease
 
-
 def _render_detection(result: dict) -> str:
     """Render detection details and return the detected disease name."""
-    # 1️⃣ Annotated image
-    st.image(
-        result.get("output_image_path"),
-        caption="Detected Leaf Diseases",
-        width=420,
-        use_container_width=False,
-    )
+    
+    # 1️⃣ Image Handling (Base64)
+    image_data = result.get("output_image_path")  # The "data:image/jpeg;base64,..." string
+    
+    if image_data:
+        # Streamlit natively displays Base64 data URLs
+        st.image(
+            image_data,
+            caption="AI Annotated Result",
+            width=420,
+            use_container_width=False,
+        )
+        
+        # 📥 Download Button Logic
+        try:
+            # We extract the raw base64 string by removing the metadata prefix
+            if "base64," in image_data:
+                header, encoded = image_data.split(",", 1)
+                binary_data = base64.b64decode(encoded)
+                
+                st.download_button(
+                    label="📥 Download Annotated Image",
+                    data=binary_data,
+                    file_name="vinedoc_detection.jpg",
+                    mime="image/jpeg",
+                    use_container_width=False
+                )
+        except Exception as e:
+            st.error(f"Could not generate download link: {e}")
 
+    # --- 2️⃣ Diagnosis & Report Logic ---
     report = result.get("report", {}) or {}
 
     primary = (
@@ -25,7 +49,7 @@ def _render_detection(result: dict) -> str:
     alert = report.get("alert_type", "STANDARD")
     primary_conf = report.get("primary_confidence")
 
-    # 2️⃣ High-level summary
+    # High-level summary
     if alert == "EMERGENCY":
         st.error(f"🚨 **Primary Diagnosis:** {primary}")
     else:
@@ -36,9 +60,8 @@ def _render_detection(result: dict) -> str:
 
     st.markdown(f"**Severity Level:** `{severity}`")
 
-    # 3️⃣ Aggregated disease confidence (FIXED)
+    # 3️⃣ Aggregated disease confidence
     st.markdown("### 🧬 Detected Diseases")
-
     disease_summary = report.get("disease_confidence_summary", {}) or {}
 
     if not disease_summary:
@@ -46,7 +69,6 @@ def _render_detection(result: dict) -> str:
     else:
         for label, stats in disease_summary.items():
             icon = "⚠️" if stats.get("is_priority") else "🦠"
-
             st.markdown(
                 f"""
                 - {icon} **{label}**
@@ -84,7 +106,12 @@ def show_detection(
         _render_detection(cached_result)
         return cached_result
 
+    if image_file is None:
+        st.warning("Please upload an image to start detection.")
+        return None
+
     try:
+        # This calls your frontend/services/detection_service.py
         result = detect_disease(image_file)
     except Exception as e:
         st.error(f"Detection failed: {e}")
