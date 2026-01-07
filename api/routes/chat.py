@@ -34,6 +34,8 @@ async def chat_endpoint(req: ChatRequest):
         session_data["messages"] = []
         session_data["detected_disease"] = req.detected_disease
         session_data["report"] = req.report
+        # IMPORTANT: also reset local reference so downstream uses the cleared list
+        messages = session_data["messages"]
     elif req.detected_disease:
         print("disease not changed")
         session_data["detected_disease"] = req.detected_disease
