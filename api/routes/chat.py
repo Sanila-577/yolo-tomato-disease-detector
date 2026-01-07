@@ -22,8 +22,11 @@ async def chat_endpoint(req: ChatRequest):
     session_data = CHAT_MEMORY[session_id]
     messages = session_data["messages"]
     
-    # Update detected disease if provided
-    if req.detected_disease:
+    # If disease changes, reset conversation so memory only reflects the latest detection
+    if req.detected_disease and req.detected_disease != session_data.get("detected_disease"):
+        session_data["messages"] = []
+        session_data["detected_disease"] = req.detected_disease
+    elif req.detected_disease:
         session_data["detected_disease"] = req.detected_disease
     
     system_context = None

@@ -1,5 +1,9 @@
 import streamlit as st
-from frontend.state import init_state
+from frontend.state import (
+    init_state,
+    load_persisted_state,
+    save_persisted_state,
+)
 from frontend.components.chat_ui import chat_ui
 from frontend.components.detection_view import show_detection
 
@@ -9,6 +13,17 @@ st.set_page_config(
 )
 
 init_state()
+
+# Restore cached state (survives browser refresh while server runs)
+persisted = load_persisted_state(st.session_state.session_id)
+if persisted and not st.session_state.get("detection_result"):
+    st.session_state["detection_result"] = persisted.get("detection_result")
+    st.session_state["chat_history"] = persisted.get("chat_history", [])
+    if st.session_state.get("detection_result"):
+        st.session_state["detected_disease"] = (
+            st.session_state["detection_result"].get("detected_disease")
+            or (st.session_state["detection_result"].get("report", {}) or {}).get("primary_diagnosis")
+        )
 
 # Theme toggle state initialization
 if "theme_mode" not in st.session_state:
@@ -121,9 +136,39 @@ uploaded_image = st.file_uploader(
 )
 
 if uploaded_image:
-    detection = show_detection(uploaded_image)
+    detection_result = show_detection(image_file=uploaded_image)
 
-    if detection:
-        st.session_state["detected_disease"] = detection
-     
-        chat_ui(detection)
+    if detection_result:
+        detected_disease = (
+            detection_result.get("detected_disease")
+            or (detection_result.get("report", {}) or {}).get("primary_diagnosis")
+        )
+
+        # Persist latest detection + reset chat to avoid mixing past diseases
+        st.session_state["detected_disease"] = detected_disease
+        st.session_state["detection_result"] = detection_result
+
+        save_persisted_state(
+            st.session_state.session_id,
+            st.session_state["detection_result"],
+            st.session_state["chat_history"],
+        )
+
+        chat_ui(detected_disease)
+elif st.session_state.get("detection_result"):
+    # Rehydrate UI from cached detection so refresh doesn't blank the page
+    detection_result = st.session_state["detection_result"]
+    detected_disease = (
+        detection_result.get("detected_disease")
+        or (detection_result.get("report", {}) or {}).get("primary_diagnosis")
+    )
+
+    show_detection(cached_result=detection_result)
+    if detected_disease:
+        st.session_state["detected_disease"] = detected_disease
+        save_persisted_state(
+            st.session_state.session_id,
+            st.session_state["detection_result"],
+            st.session_state["chat_history"],
+        )
+        chat_ui(detected_disease)
