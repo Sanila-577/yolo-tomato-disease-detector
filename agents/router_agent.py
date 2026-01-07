@@ -19,12 +19,17 @@ def router_agent(state: AgentState) -> AgentState:
     system_prompt = SystemMessage(
         content = """
         Classify the user's question into one of these intents:
-        - chat (greetings or casual conversation)
-        - rag (plant knowledge)
-        - web (general knowledge)
+        - chat: greetings or clarifying the already-detected disease in the system context
+        - rag: tomato plant disease knowledge (symptoms, causes, prevention, treatments)
+        - web: only if the question is clearly outside plant/plant-disease/agriculture topics
 
-        Answer with only one intent: chat, rag, or web.
-        Do Not Include Any Other Text
+        Hard rules:
+        1) If the system context mentions a detected plant disease or scientific name, prefer chat, NOT web.
+        2) Questions about the detected disease name, meaning, symptoms, treatment, or care => rag.
+        3) Greetings or meta questions about the conversation => chat.
+        4) Route to web ONLY for non-plant topics (e.g., human health, finance, weather).
+
+        Answer with exactly one token: chat, rag, or web.
         """
     )
 
@@ -35,8 +40,8 @@ def router_agent(state: AgentState) -> AgentState:
 
     # Only allow valid routes
     if route not in ["chat", "rag", "web"]:
-        print(f"⚠️ Router returned invalid route: {repr(route)}. Defaulting to 'chat'.")
-        route = "chat"
+        print(f"⚠️ Router returned invalid route: {repr(route)}. Defaulting to 'rag'.")
+        route = "rag"
 
     state["route"] = route
     print(f"🔀 Router: Routed to {state['route']}")

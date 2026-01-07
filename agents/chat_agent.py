@@ -20,11 +20,11 @@ def chat_agent(state: AgentState) -> AgentState:
         content="You are a friendly assistant. Respond naturally."
     )
 
-    # last user message
-    user_message = state["messages"][-1]
+    # Use all messages (which includes system context with disease info)
+    messages = [system_prompt] + state["messages"]
 
     # invoke LLM
-    response = llm.invoke([system_prompt, user_message])
+    response = llm.invoke(messages)
 
     # append AI response to state messages
     state["messages"] = state["messages"] + [response]
