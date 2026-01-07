@@ -125,5 +125,5 @@ if uploaded_image:
 
     if detection:
         st.session_state["detected_disease"] = detection
-        st.divider()
+     
         chat_ui(detection)
