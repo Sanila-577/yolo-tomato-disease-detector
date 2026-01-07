@@ -24,21 +24,6 @@ async def detect_disease(request: Request, file: UploadFile = File(...)):
     if not isinstance(inference_result, tuple):
         raise ValueError("run_yolo_inference did not return a tuple as expected")
 
-    # Handle both legacy and updated signatures gracefully
-    # if len(inference_result) == 4:
-    #     first, second, third, fourth = inference_result
-    #     if isinstance(first, str):
-    #         # (detected_disease, detections, report, image)
-    #         detected_disease, detections, report, image = first, second, third, fourth
-    #     elif isinstance(first, np.ndarray):
-    #         # (image, detections, report, detected_disease?) -> prefer report for disease
-    #         image, detections, report, maybe_disease = first, second, third, fourth
-    #         detected_disease = (
-    #             (report or {}).get("primary_diagnosis")
-    #             or (maybe_disease if isinstance(maybe_disease, str) else "Healthy")
-    #         )
-    #     else:
-    #         raise ValueError("Unsupported return signature from run_yolo_inference (len=4)")
     if len(inference_result) == 3:
         first, second, third = inference_result
         if isinstance(first, np.ndarray):
