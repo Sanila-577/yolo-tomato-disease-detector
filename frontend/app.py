@@ -31,50 +31,6 @@ if persisted and not st.session_state.get("detection_result"):
         )
 
 
-# # ----------------------------
-# # Load CSS + Set Theme on Body
-# # ----------------------------
-# css_file = Path("frontend/styles/theme.css")
-# css_content = css_file.read_text() if css_file.exists() else ""
-
-# st.markdown(
-#     f"""
-#     <style>
-#     {css_content}
-#     </style>
-
-#     <script>
-#     (function() {{
-#         const saved = localStorage.getItem("theme_mode") || "{st.session_state.theme_mode}";
-#         document.body.setAttribute("data-theme", saved);
-#     }})();
-#     </script>
-#     """,
-#     unsafe_allow_html=True
-# )
-
-# # ----------------------------
-# # Theme Toggle Button UI
-# # ----------------------------
-# col1, col2 = st.columns([8, 1])
-# with col2:
-#     icon = "🌙" if st.session_state.theme_mode == "light" else "☀️"
-#     if st.button(icon, key="theme_toggle", help="Toggle theme"):
-#         new_mode = "dark" if st.session_state.theme_mode == "light" else "light"
-#         st.session_state.theme_mode = new_mode
-
-#         # Sync to browser localStorage + force page rerender
-#         st.markdown(
-#             f"""
-#             <script>
-#             localStorage.setItem("theme_mode", "{new_mode}");
-#             document.body.setAttribute("data-theme", "{new_mode}");
-#             window.location.reload();
-#             </script>
-#             """,
-#             unsafe_allow_html=True
-#     )
-
 # ----------------------------
 # App Title
 # ----------------------------
