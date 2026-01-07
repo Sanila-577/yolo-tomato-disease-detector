@@ -17,10 +17,7 @@ load_dotenv()
 
 def chat_agent(state: AgentState) -> AgentState:
     system_prompt = SystemMessage(
-        content="""You are a friendly agricultural assistant. 
-        You have access to the detected disease information in the conversation context.
-        When answering questions, reference the disease name and use the context provided.
-        Respond naturally and helpfully."""
+        content="You are a friendly assistant. Respond naturally."
     )
 
     # Use all messages (which includes system context with disease info)
