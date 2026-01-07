@@ -19,7 +19,12 @@ def chat_ui(disease):
         st.chat_message("user").write(user_input)
 
         session_id = st.session_state.get("session_id", "default")
-        response, stored_disease = chat_backend(user_input, disease, session_id=session_id)
+        response, stored_disease = chat_backend(
+            user_input,
+            disease,
+            session_id=session_id,
+            report=st.session_state.get("detection_result", {}).get("report"),
+        )
 
         st.chat_message("assistant").write(response)
 
