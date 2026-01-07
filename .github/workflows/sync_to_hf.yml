@@ -1,0 +1,22 @@
+name: Sync to Hugging Face Hub
+on:
+  push:
+    branches: [backend] # Triggers when you push to your backend branch
+  workflow_dispatch:     # Allows you to run it manually
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Push to hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Sync the 'backend' branch to the HF 'main' branch
+          git push -f https://sanila-wijesekara:$HF_TOKEN@huggingface.co/spaces/sanila-wijesekara/neuro-leaf-backend backend:main
+
+        
