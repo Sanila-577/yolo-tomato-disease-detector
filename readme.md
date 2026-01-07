@@ -1,170 +1,96 @@
-# 🌱 Plant RAG Chatbot (LangGraph + FAISS + Streamlit)
+# 🌱 Tomato Leaf Disease Assistant
 
-An intelligent Retrieval-Augmented Generation (RAG) chatbot for answering plant-related questions using PDF knowledge, web search fallback, and multi-agent reasoning built with LangGraph, LangChain, FAISS, and Streamlit.
+FastAPI + LangGraph backend with a Streamlit frontend for tomato leaf disease detection and guidance. Runs YOLO-based vision to detect diseases, feeds the latest report into a LangGraph chat pipeline, and serves responses through a chat UI.
 
 ---
 
-## 🚀 Features
-- 🧠 Multi-Agent Architecture (LangGraph)
-- Router Agent (Chat / RAG / Web)
-- RAG Agent (FAISS Vector Search)
-- Web Agent (Tavily Search)
-- Grader Agent (Context relevance checking)
-- 📚 RAG over PDFs from `context/`
-- FAISS for semantic similarity search
-- HuggingFace embeddings (`all-MiniLM-L6-v2`)
-- 🌐 Web Search Fallback (Tavily)
-- 💬 Conversational memory with LangChain messages
-- 🖥️ Streamlit UI
-🌱 Plant RAG Chatbot (LangGraph + FAISS + Streamlit)
+## 📦 What’s Inside
+- FastAPI service (`api/main.py`) with routes:
+	- `/detect` – runs YOLO inference, returns annotated image + report
+	- `/chat` – LangGraph chat endpoint with per-session memory
+	- `/health` – basic health check
+- Streamlit UI (`frontend/app.py`) for upload, detection preview, and chat
+- LangGraph agents (`agents/`) for routing, RAG, web fallback, and grading
+- Vision pipeline (`vision/`) and YOLO weights in `models/tomato_leaf_disease_detector_v1.pt`
+- FAISS vector store in `faiss_db/` for RAG
+- Shared state helpers in `frontend/state.py` for session IDs and caching
+
 ---
 
-## 📁 Project Structure
+## 🗂️ Project Structure (high level)
 
 ```
-RAG-chatbot/
-├─ context/                     # PDF documents for RAG
-├─ faiss_db/                    # Persistent FAISS index storage
-│  └─ index.faiss               # Auto-generated on first run
-├─ agents/                      # Agent logic
-│  ├─ router_agent.py
-│  ├─ chat_agent.py
-│  ├─ retriever_agent.py
-│  ├─ web_agent.py
-│  └─ grader_answer_agent.py
-├─ tools/                       # Tool definitions
-│  ├─ retriever_tool.py
-│  └─ tavily_search_tool.py
-├─ core/                        # Graph construction and execution
-│  ├─ build_graph.py
-│  ├─ faiss_setup.py
-│  ├─ llm.py
-│  └─ run_agent.py
-├─ streamlit_app.py             # Streamlit frontend
-├─ requirements.txt
-├─ .env                         # Create this
-└─ readme.md
+agents/              # router, chat, retriever, web, grader agents
+api/                 # FastAPI app, chat & detect routes
+core/                # LangGraph build/run, FAISS setup, LLM config
+frontend/            # Streamlit UI (app.py), components, services, styles
+vision/              # YOLO inference and utilities
+models/              # YOLO weights
+faiss_db/            # FAISS index
+static/outputs/      # Annotated images from detection
+data/                # Dataset samples
+readme.md, requirements.txt, start.sh, Dockerfile
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## 🧰 Prerequisites
+- Python 3.10+ recommended
+- Virtual environment (venv/conda)
+- GPU optional; YOLO will run on CPU if CUDA is unavailable
 
-### 1️⃣ Clone or open the project
-If cloning from Git:
-
-```bash
-git clone <your-repo-url>
-cd RAG-chatbot
+Environment variables (create `.env` in project root):
+```
+OPENROUTER_API_KEY=your_key          # for LLM in core/llm.py
+TAVILY_API_KEY=your_key              # for web fallback
 ```
 
-### 2️⃣ Create and activate a virtual environment
+---
+
+## 🚀 Setup
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate        # macOS / Linux
-# venv\Scripts\activate         # Windows (PowerShell)
-```
-
-### 3️⃣ Install dependencies
-
-```bash
+source .venv/bin/activate           # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4️⃣ Environment Variables
-Create a `.env` file in the project root:
-
-```env
-OPENROUTER_API_KEY=your_openrouter_api_key
-TAVILY_API_KEY=your_tavily_api_key
-```
-
-Notes:
-- LLM configured via OpenRouter in `core/llm.py` using model `openai/gpt-4o-mini`.
-- Tavily is used for web search fallback; an API key is required.
+If you need the FAISS index fresh, delete `faiss_db/` and it will rebuild on first RAG call.
 
 ---
 
-## 📚 PDF Knowledge Base
-- Place your plant-related PDFs inside `context/`.
-- On first run, FAISS embeddings are created automatically from PDFs using `all-MiniLM-L6-v2`.
-- Subsequent runs load the vector store from `faiss_db/` (no re-embedding).
+## ▶️ Run the stack
 
----
-
-## ▶️ Running the Application
-
-### 🖥️ Streamlit UI (Recommended)
+In one terminal (backend):
 ```bash
-streamlit run streamlit_app.py
+cd /Users/sanilawijesekara/Documents/RAG-chatbot
+fastapi dev ./api/main.py           # or: uvicorn api.main:app --reload
 ```
-Open: http://localhost:8501
 
-### 💻 Terminal Version (Optional)
+In another terminal (frontend):
 ```bash
-python -m core.run_agent
+cd /Users/sanilawijesekara/Documents/RAG-chatbot
+streamlit run ./frontend/app.py
 ```
 
----
-
-## 🧠 How It Works
-
-### 1️⃣ Router Agent
-Classifies the query into:
-- `chat` → casual conversation
-- `rag` → plant knowledge from PDFs
-- `web` → general knowledge via Tavily
-
-### 2️⃣ RAG Agent
-- Uses FAISS to retrieve relevant document chunks
-- Calls the retriever tool
-- Stores retrieved content for grading
-
-### 3️⃣ Grader + Answer
-- Evaluates whether retrieved context fully answers the question
-- If insufficient, triggers web fallback
-- If sufficient, generates final answer
-
-### 4️⃣ Web Agent (Fallback)
-- Uses Tavily search for live web information
-- Returns answers when local knowledge is insufficient
+Open Streamlit at http://localhost:8501 and upload a tomato leaf image.
 
 ---
 
-## 🧪 Tech Stack
-- LangGraph – Multi-agent workflow orchestration
-- LangChain – Tool calling & message handling
-- FAISS – Vector similarity search
-- HuggingFace Embeddings (`all-MiniLM-L6-v2`)
-- OpenRouter (model: `openai/gpt-4o-mini`)
-- Tavily API – Web search
-- Streamlit – Frontend UI
+## 🧠 How it works
+1) Upload leaf image → `/detect` returns annotated image + structured report
+2) The latest report is stored per session and sent with the first chat turn
+3) LangGraph routes: chat for small talk, RAG over FAISS for plant knowledge, web for out-of-domain
+4) Chat memory resets when a new disease is detected; the UI still shows your previous messages for convenience
 
 ---
 
-## ✅ Example Queries
-- What are common tomato plant diseases?
-- How to treat leaf curl in tomatoes?
-- What is nitrogen deficiency in plants?
-- Hello!
-- Latest research on plant fungal infections
+## 🔎 Troubleshooting
+- If detection fails: ensure the model file exists at `models/tomato_leaf_disease_detector_v1.pt` and the image is a valid JPG/PNG.
+- If chat fails: confirm `fastapi dev ./api/main.py` is running and API_URL in frontend services points to the backend (defaults to 127.0.0.1:8000).
+- For theme issues: UI styling is driven by `frontend/styles/theme.css`; adjust there if needed.
 
 ---
 
-## 🔒 Notes
-- FAISS index persists between runs (stored in `faiss_db/`)
-- Chat memory resets on Streamlit refresh
-- Designed for modular expansion (tools, agents, memory)
-
-## 🛠️ Troubleshooting
-- If FAISS build fails, ensure PDFs exist in `context/` and retry.
-- If OpenRouter requests fail, check `OPENROUTER_API_KEY` and network access.
-- For Tavily errors, verify `TAVILY_API_KEY` and reduce `max_results` in `tools/tavily_search_tool.py` if rate limited.
-
----
-
-## 🧑‍💻 Author
-Built with ❤️ using LangGraph + RAG. Feel free to fork, extend, and deploy 🚀
-
----
+## 📄 License
+MIT (update if your project uses a different license).
