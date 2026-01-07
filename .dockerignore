@@ -1,0 +1,16 @@
+# Local environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Heavy training data (Don't push these to production!)
+data/dataset/
+runs/
+*.ipynb
+
+# Git and OS metadata
+.git/
+.gitignore
+.DS_Store
+.env

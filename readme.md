@@ -7,7 +7,7 @@ sdk: docker
 app_port: 7860
 pinned: false
 ---
-# Tomato Leaf Disease Assistant - Backend
+# Neuro Leaf: Tomato Leaf Disease Assistant - Backend
 
 This is the FastAPI backend for the Tomato Leaf Disease Assistant, powered by YOLO 11l and a LangGraph-based RAG agent.
 
