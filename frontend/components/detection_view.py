@@ -1,26 +1,25 @@
+from typing import Optional, Dict
+
 import streamlit as st
 from frontend.services.detection_service import detect_disease
 
 
-def show_detection(image_file):
-    st.subheader("🔍 Detection Result")
-
-    try:
-        result = detect_disease(image_file)
-    except Exception as e:
-        st.error(f"Detection failed: {e}")
-        return None
-
+def _render_detection(result: dict) -> str:
+    """Render detection details and return the detected disease name."""
     # 1️⃣ Annotated image
     st.image(
-        result["output_image_path"],
+        result.get("output_image_path"),
         caption="Detected Leaf Diseases",
         use_container_width=True
     )
 
-    report = result.get("report", {})
+    report = result.get("report", {}) or {}
 
-    primary = report.get("primary_diagnosis", "Unknown")
+    primary = (
+        result.get("detected_disease")
+        or report.get("primary_diagnosis")
+        or "Unknown"
+    )
     severity = report.get("severity_level", "Unknown")
     alert = report.get("alert_type", "STANDARD")
     primary_conf = report.get("primary_confidence")
@@ -39,25 +38,25 @@ def show_detection(image_file):
     # 3️⃣ Aggregated disease confidence (FIXED)
     st.markdown("### 🧬 Detected Conditions (Aggregated)")
 
-    disease_summary = report.get("disease_confidence_summary", {})
+    disease_summary = report.get("disease_confidence_summary", {}) or {}
 
     if not disease_summary:
         st.info("No disease symptoms detected. Plant appears healthy.")
     else:
         for label, stats in disease_summary.items():
-            icon = "⚠️" if stats["is_priority"] else "🦠"
+            icon = "⚠️" if stats.get("is_priority") else "🦠"
 
             st.markdown(
                 f"""
                 - {icon} **{label}**
-                  - Max confidence: **{stats['max_confidence']}%**
-                  - Mean confidence: **{stats['mean_confidence']}%**
-                  - Detections: `{stats['detections']}`
+                  - Max confidence: **{stats.get('max_confidence', 'N/A')}%**
+                  - Mean confidence: **{stats.get('mean_confidence', 'N/A')}%**
+                  - Detections: `{stats.get('detections', 'N/A')}`
                 """
             )
 
     # 4️⃣ Co-infections
-    co = report.get("co_infections", [])
+    co = report.get("co_infections", []) or []
     if co:
         st.warning("⚠️ **Co-Infections Detected:**")
         for disease in co:
@@ -70,3 +69,25 @@ def show_detection(image_file):
         st.info(report.get("treatment_steps", "No recommendation available."))
 
     return primary
+
+
+def show_detection(
+    image_file=None,
+    cached_result: Optional[Dict] = None,
+) -> Optional[Dict]:
+    """Run or render detection and return the detection payload."""
+    st.subheader("🔍 Detection Result")
+
+    if cached_result is not None:
+        # Use the cached payload without re-calling the API
+        _render_detection(cached_result)
+        return cached_result
+
+    try:
+        result = detect_disease(image_file)
+    except Exception as e:
+        st.error(f"Detection failed: {e}")
+        return None
+
+    _render_detection(result)
+    return result

@@ -19,17 +19,17 @@ def router_agent(state: AgentState) -> AgentState:
     system_prompt = SystemMessage(
         content = """
         Classify the user's question into one of these intents:
-        - chat (greetings, casual conversation, or questions about the detected disease that are already provided in the context)
-        - rag (plant disease knowledge from database - symptoms, causes, prevention methods)
-        - web (general knowledge or information not related to plant diseases)
+        - chat: greetings or clarifying the already-detected disease in the system context
+        - rag: tomato plant disease knowledge (symptoms, causes, prevention, treatments)
+        - web: only if the question is clearly outside plant/plant-disease/agriculture topics
 
-        Rules:
-        1. If the question asks about the disease NAME itself (e.g., "what is the name of the disease?"), route to 'chat' since it's in the system context
-        2. If the question asks about disease treatment, symptoms, causes, or prevention, route to 'rag'
-        3. Otherwise route to 'web' or 'chat' based on the question type
+        Hard rules:
+        1) If the system context mentions a detected plant disease, prefer chat/rag, NOT web.
+        2) Questions about the detected disease name, meaning, symptoms, treatment, or care => rag.
+        3) Greetings or meta questions about the conversation => chat.
+        4) Route to web ONLY for non-plant topics (e.g., human health, finance, weather).
 
-        Answer with only one intent: chat, rag, or web.
-        Do Not Include Any Other Text
+        Answer with exactly one token: chat, rag, or web.
         """
     )
 
