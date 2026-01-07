@@ -10,7 +10,8 @@ def _render_detection(result: dict) -> str:
     st.image(
         result.get("output_image_path"),
         caption="Detected Leaf Diseases",
-        use_container_width=True
+        width=420,
+        use_container_width=False,
     )
 
     report = result.get("report", {}) or {}

@@ -5,13 +5,13 @@ from typing import Optional, Dict, Any
 
 def _get_or_set_query_session_id() -> str:
     """Get a stable session id that survives browser refresh via query params."""
-    params = st.experimental_get_query_params()
-    existing = params.get("sid", [])
+    params = st.query_params
+    existing = params.get("sid")
     if existing:
-        return existing[0]
+        return existing[0] if isinstance(existing, list) else existing
 
     sid = uuid.uuid4().hex
-    st.experimental_set_query_params(sid=sid)
+    st.query_params["sid"] = sid
     return sid
 
 
