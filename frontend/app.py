@@ -11,7 +11,7 @@ from frontend.components.detection_view import show_detection
 # App Config
 # ----------------------------
 st.set_page_config(
-    page_title="Tomato Plant Disease Detection",
+    page_title="Neuro Leaf",
     layout="wide"
 )
 
@@ -34,7 +34,7 @@ if persisted and not st.session_state.get("detection_result"):
 # ----------------------------
 # App Title
 # ----------------------------
-st.title("Tomato Leaf Disease Detection")
+st.title("Tomato leaf disease detection")
 
 # ----------------------------
 # File Upload / Detection
