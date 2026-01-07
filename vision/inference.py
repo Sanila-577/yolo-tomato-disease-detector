@@ -9,12 +9,12 @@ HIGH_PRIORITY_DISEASES = {"Late Blight"}
 
 # Treatment Dictionary for your specific 7 classes
 TREATMENT_ADVISOR = {
-    "Late Blight": "EMERGENCY: Highly contagious. Remove and destroy infected plants. Do not compost. Apply fungicides to healthy neighbors.",
-    "Early Blight": "Remove lower infected leaves. Improve airflow. Use copper-based fungicides if spreading.",
-    "Bacterial Spot": "Avoid overhead watering. Apply copper-based bactericides. Sanitize tools between plants.",
-    "Leaf Mold": "Reduce humidity and increase ventilation. Prune for better airflow.",
-    "Target Spot": "Remove debris from soil. Apply appropriate fungicide. Avoid working with plants when wet.",
-    "Black Spot": "Prune infected areas. Improve drainage and sunlight exposure.",
+    "Late_blight": "EMERGENCY: Highly contagious. Remove and destroy infected plants. Do not compost. Apply fungicides to healthy neighbors.",
+    "Early_Blight": "Remove lower infected leaves. Improve airflow. Use copper-based fungicides if spreading.",
+    "Bacterial_Spot": "Avoid overhead watering. Apply copper-based bactericides. Sanitize tools between plants.",
+    "Leaf_Mold": "Reduce humidity and increase ventilation. Prune for better airflow.",
+    "Target_Spot": "Remove debris from soil. Apply appropriate fungicide. Avoid working with plants when wet.",
+    "Black_Spot": "Prune infected areas. Improve drainage and sunlight exposure.",
     "Healthy": "Plant looks great! Keep monitoring and maintain regular watering/fertilizing."
 }
 
@@ -40,6 +40,7 @@ def run_yolo_inference(image_bytes: bytes):
 
     # 2. YOLO Inference
     results = yolo_model(image)
+    print(results)
     result = results[0]
     
     raw_detections: List[Dict] = []
@@ -91,6 +92,8 @@ def run_yolo_inference(image_bytes: bytes):
             primary_diag = max(diseases_found, key=lambda x: x["confidence"])["label"]
         
         count = len(diseases_found)
+        print("Number of diseases: ", count)
+        
         total_disease_area = sum((d["x2"]-d["x1"])*(d["y2"]-d["y1"]) for d in diseases_found)
         coverage = total_disease_area / (w * h)
 
@@ -104,14 +107,38 @@ def run_yolo_inference(image_bytes: bytes):
 
     # 5. Build Final Report
     co_infections = list(set([d["label"] for d in kept if d["label"] != primary_diag and d["label"] != "Healthy"]))
+    print(primary_diag)
     
+    # --- Aggregate confidence per disease ---
+    disease_conf_map = {}
+    for d in kept:
+        disease_conf_map.setdefault(d["label"], []).append(d["confidence"])
+
+    disease_confidence_summary = {
+        label: {
+            "max_confidence": round(max(confs) * 100, 1),
+            "mean_confidence": round(sum(confs) / len(confs) * 100, 1),
+            "detections": len(confs),
+            "is_priority": any(d["is_priority"] for d in kept if d["label"] == label)
+        }
+        for label, confs in disease_conf_map.items()
+    }
+
     report = {
         "primary_diagnosis": primary_diag,
+        "primary_confidence": round(
+            max(disease_conf_map.get(primary_diag, [0])) * 100, 1
+        ) if disease_conf_map else None,
+
         "severity_level": severity,
         "co_infections": co_infections,
+
+        "disease_confidence_summary": disease_confidence_summary,
+
         "treatment_steps": TREATMENT_ADVISOR.get(primary_diag, "Monitor plant health."),
-        "confidence_score": f"{max([d['confidence'] for d in kept]) * 100:.1f}%" if kept else "N/A",
-        "alert_type": "EMERGENCY" if primary_diag == "Late Blight" else "STANDARD"
+        "alert_type": "EMERGENCY" if primary_diag == "Late_blight" else "STANDARD"
     }
+    print("kept: ",kept)
+    print("report: ",report)
 
     return image, kept, report

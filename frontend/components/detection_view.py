@@ -1,6 +1,7 @@
 import streamlit as st
 from frontend.services.detection_service import detect_disease
 
+
 def show_detection(image_file):
     st.subheader("🔍 Detection Result")
 
@@ -10,30 +11,62 @@ def show_detection(image_file):
         st.error(f"Detection failed: {e}")
         return None
 
-    # Overlay bounding boxes image
-    st.image(result["output_image_path"], caption="Detected Diseases")
+    # 1️⃣ Annotated image
+    st.image(
+        result["output_image_path"],
+        caption="Detected Leaf Diseases",
+        use_container_width=True
+    )
 
-    # Summary Bar
-    report = result.get("report") or {}
-    primary = report.get("primary_diagnosis", result.get("detected_disease"))
-    severity = report.get("severity_level", "")
-    issues_summary = report.get("issues_detected_summary", "")
+    report = result.get("report", {})
 
-    st.info(f"{issues_summary}")
+    primary = report.get("primary_diagnosis", "Unknown")
+    severity = report.get("severity_level", "Unknown")
+    alert = report.get("alert_type", "STANDARD")
+    primary_conf = report.get("primary_confidence")
 
-    with st.expander("Disease Report Card", expanded=True):
-        st.markdown(f"- Primary Diagnosis: **{primary}**")
-        st.markdown(f"- Severity Level: **{severity}**")
-        co = report.get("co_infections") or []
-        if co:
-            st.markdown("- Co-Infections:")
-            for item in co:
-                st.markdown(f"  - {item}")
-        else:
-            st.markdown("- Co-Infections: None detected")
-        st.markdown(f"- Immediate Action: {report.get('immediate_action', '')}")
-        st.markdown(f"- Confidence Level: {report.get('confidence_level', '')}")
+    # 2️⃣ High-level summary
+    if alert == "EMERGENCY":
+        st.error(f"🚨 **Primary Diagnosis:** {primary}")
+    else:
+        st.success(f"🌿 **Primary Diagnosis:** {primary}")
 
-    st.success(f"Detected: {primary}")
+    if primary_conf is not None:
+        st.markdown(f"**Primary Confidence:** `{primary_conf}%`")
+
+    st.markdown(f"**Severity Level:** `{severity}`")
+
+    # 3️⃣ Aggregated disease confidence (FIXED)
+    st.markdown("### 🧬 Detected Conditions (Aggregated)")
+
+    disease_summary = report.get("disease_confidence_summary", {})
+
+    if not disease_summary:
+        st.info("No disease symptoms detected. Plant appears healthy.")
+    else:
+        for label, stats in disease_summary.items():
+            icon = "⚠️" if stats["is_priority"] else "🦠"
+
+            st.markdown(
+                f"""
+                - {icon} **{label}**
+                  - Max confidence: **{stats['max_confidence']}%**
+                  - Mean confidence: **{stats['mean_confidence']}%**
+                  - Detections: `{stats['detections']}`
+                """
+            )
+
+    # 4️⃣ Co-infections
+    co = report.get("co_infections", [])
+    if co:
+        st.warning("⚠️ **Co-Infections Detected:**")
+        for disease in co:
+            st.markdown(f"- {disease}")
+    else:
+        st.markdown("✅ **No co-infections detected**")
+
+    # 5️⃣ Treatment advice
+    with st.expander("💊 Recommended Action", expanded=True):
+        st.info(report.get("treatment_steps", "No recommendation available."))
 
     return primary
