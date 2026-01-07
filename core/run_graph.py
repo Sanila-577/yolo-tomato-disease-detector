@@ -4,6 +4,7 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 app = build_graph()
 
 def run_graph(user_input: str, messages=None, system_context: str | None = None):
+    print("In the run graph")
     if messages is None:
         messages = []
 
@@ -13,6 +14,7 @@ def run_graph(user_input: str, messages=None, system_context: str | None = None)
 
     # Append user message (✅ FIXED)
     messages.append(HumanMessage(content=user_input))
+    print("Graph fed message: ",messages)
 
     result = app.invoke(
         {

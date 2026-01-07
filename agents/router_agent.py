@@ -24,7 +24,7 @@ def router_agent(state: AgentState) -> AgentState:
         - web: only if the question is clearly outside plant/plant-disease/agriculture topics
 
         Hard rules:
-        1) If the system context mentions a detected plant disease, prefer chat/rag, NOT web.
+        1) If the system context mentions a detected plant disease or scientific name, prefer chat, NOT web.
         2) Questions about the detected disease name, meaning, symptoms, treatment, or care => rag.
         3) Greetings or meta questions about the conversation => chat.
         4) Route to web ONLY for non-plant topics (e.g., human health, finance, weather).
