@@ -8,8 +8,7 @@ def draw_boxes(image, detections: List[dict]):
         x1, y1, x2, y2 = map(int, [det["x1"], det["y1"], det["x2"], det["y2"]])
         label = f"{det['label']} ({det['confidence']:.2f})"
         color = (0, 255, 0)
-        if det.get("is_quarantine"):
-            color = (0, 165, 255)  # orange for warnings
+        
         cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
         
         cv2.putText(
