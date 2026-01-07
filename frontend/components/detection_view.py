@@ -37,7 +37,7 @@ def _render_detection(result: dict) -> str:
     st.markdown(f"**Severity Level:** `{severity}`")
 
     # 3️⃣ Aggregated disease confidence (FIXED)
-    st.markdown("### 🧬 Detected Conditions (Aggregated)")
+    st.markdown("### 🧬 Detected Diseases")
 
     disease_summary = report.get("disease_confidence_summary", {}) or {}
 
