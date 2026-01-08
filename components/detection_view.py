@@ -1,8 +1,6 @@
 from typing import Optional, Dict
-
 import streamlit as st
 from frontend.services.detection_service import detect_disease
-
 
 def _render_detection(result: dict) -> str:
     """Render detection details and return the detected disease name."""
