@@ -1,6 +1,9 @@
 import requests
+import streamlit as st
 
-API_URL = "http://127.0.0.1:8000/detect"
+# API_URL = "http://127.0.0.1:8000/detect"
+
+BACKEND_URL = st.secrets.get("BACKEND_URL","http://localhost:8000")
 
 def detect_disease(image_file):
     # Streamlit's UploadedFile needs to be converted into a proper multipart tuple
@@ -10,7 +13,7 @@ def detect_disease(image_file):
         content_type = getattr(image_file, "type", None) or "image/jpeg"
 
         files = {"file": (filename, file_bytes, content_type)}
-        res = requests.post(API_URL, files=files, timeout=30)
+        res = requests.post(f"{BACKEND_URL}/detect", files=files, timeout=30)
         res.raise_for_status()
         return res.json()
     except requests.HTTPError as e:

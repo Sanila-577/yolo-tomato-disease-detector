@@ -1,8 +1,8 @@
 import requests
 import streamlit as st
 
-API_URL = "http://127.0.0.1:8000/chat"
-
+# API_URL = "http://127.0.0.1:8000/chat"
+BACKEND_URL = st.secrets.get("BACKEND_URL","http://localhost:8000")
 
 def chat_backend(message, disease, session_id="default", report=None):
     # Track first message for this session+disease combo
@@ -19,7 +19,7 @@ def chat_backend(message, disease, session_id="default", report=None):
         "is_first_message": is_first,
     }
     print("payload: ",payload)
-    res = requests.post(API_URL, json=payload)
+    res = requests.post(f"{BACKEND_URL}/chat", json=payload)
     res.raise_for_status()
     response_data = res.json()
     return response_data["answer"], response_data.get("detected_disease")
