@@ -1,7 +1,6 @@
 import streamlit as st
-from frontend.services.chat_service import chat_backend
-from frontend.state import save_persisted_state
-
+from services.chat_service import chat_backend
+from state import save_persisted_state
 
 def chat_ui(disease):
     st.subheader("Ask about the disease")

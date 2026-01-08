@@ -1,11 +1,11 @@
 import streamlit as st
-from frontend.state import (
+from state import (
     init_state,
     load_persisted_state,
     save_persisted_state,
 )
-from frontend.components.chat_ui import chat_ui
-from frontend.components.detection_view import show_detection
+from components.chat_ui import chat_ui
+from components.detection_view import show_detection
 
 # ----------------------------
 # App Config
