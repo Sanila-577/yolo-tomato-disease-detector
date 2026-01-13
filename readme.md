@@ -181,12 +181,6 @@ def save_persisted_state(...)         # Save data to cache
 }
 ```
 
-**Error Handling**:
-
-- HTTPError: Logs server-side error details
-- JSONDecodeError: Reports invalid API response
-- Includes error messages for debugging
-
 ---
 
 ### `services/detection_service.py` - Detection API Client
@@ -370,8 +364,6 @@ See `Dockerfile` for containerized deployment
 
 - Development: `http://localhost:8000`
 - Production: `https://sanila-wijesekara-neuro-leaf-backend.hf.space` (configured in Streamlit Cloud)
-
----
 
 ---
 
