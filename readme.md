@@ -25,6 +25,8 @@ Check this out: https://neuroleaf.streamlit.app/
   - **Web Agent** – Tavily-powered web search for out-of-domain queries
   - **Grader Agent** – Evaluates answer relevance and triggers fallback if needed
 
+Backend deployed in hugging face spaces at https://sanila-wijesekara-neuro-leaf-backend.hf.space
+
 ### 🎨 Frontend (Streamlit)
 
 - **Main App** (`frontend/app.py`):
