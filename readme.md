@@ -2,6 +2,8 @@
 
 A production-ready AI system combining computer vision and conversational AI for tomato leaf disease diagnosis and treatment guidance. Built with FastAPI backend, LangGraph agentic workflow, and Streamlit frontend.
 
+Check this out: https://neuroleaf.streamlit.app/
+
 ---
 
 ## 📦 What's Inside
