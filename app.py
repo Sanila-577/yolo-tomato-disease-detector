@@ -11,8 +11,10 @@ from components.detection_view import show_detection
 # App Config
 # ----------------------------
 st.set_page_config(
-    page_title="Neuro Leaf",
-    layout="wide"
+    page_title="Neuro Leaf - Tomato Disease Detection",
+    page_icon="🍃",
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # ----------------------------
