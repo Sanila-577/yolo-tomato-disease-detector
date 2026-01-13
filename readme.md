@@ -7,6 +7,7 @@ A production-ready AI system combining computer vision and conversational AI for
 ## 📦 What's Inside
 
 ### 🔧 Backend (FastAPI)
+
 - **API Service** (`api/main.py`):
   - `POST /detect` – YOLO-based disease detection with annotated images and structured reports
   - `POST /chat` – LangGraph-powered chat with session-based memory
@@ -14,6 +15,7 @@ A production-ready AI system combining computer vision and conversational AI for
   - Static file serving for annotated images at `/static`
 
 ### 🤖 AI Components
+
 - **LangGraph Agents** (`agents/`):
   - **Router Agent** – Intelligently routes queries to chat, RAG, or web search
   - **Chat Agent** – Handles casual conversation and greetings
@@ -22,13 +24,15 @@ A production-ready AI system combining computer vision and conversational AI for
   - **Grader Agent** – Evaluates answer relevance and triggers fallback if needed
 
 ### 🎨 Frontend (Streamlit)
+
 - **Main App** (`frontend/app.py`):
   - Image upload and disease detection interface
   - Real-time chat UI with disease-specific context
   - Session state management with persistence
   - Automatic memory reset on new disease detection
-  
+
 ### 🔬 Vision System (YOLO)
+
 - **Inference Pipeline** (`vision/`):
   - **Ultralytics YOLOv11 Large (YOLO11l)** object detection for 7 disease classes
   - Non-maximum suppression (NMS) for overlapping detections
@@ -37,6 +41,7 @@ A production-ready AI system combining computer vision and conversational AI for
   - High-priority disease flagging (e.g., Late Blight)
 
 ### 📚 Knowledge Base
+
 - **FAISS Vector Store** (`faiss_db/`):
   - Built from PDF documents in `context/` folder (10 research papers)
   - Embeddings via HuggingFace `all-MiniLM-L6-v2`
@@ -44,6 +49,7 @@ A production-ready AI system combining computer vision and conversational AI for
   - Automatically rebuilds if index is missing
 
 ### 🔑 Key Features
+
 - Session-based chat memory that persists across page refreshes
 - Disease-specific conversation context injection
 - Multi-agent routing for optimal answer quality
@@ -171,6 +177,7 @@ TAVILY_API_KEY=your_tavily_key            # Required for web search fallback
 ### 📋 Dependencies
 
 All dependencies are listed in `requirements.txt`:
+
 - **LangChain Ecosystem**: langchain, langchain-core, langchain-openai, langgraph, langchain-community
 - **FastAPI Stack**: fastapi, uvicorn, pydantic, python-multipart
 - **Machine Learning**: ultralytics (YOLO), sentence-transformers, faiss-cpu
@@ -269,25 +276,63 @@ User uploads image → FastAPI /detect endpoint
 → Response with image URL + JSON report
 ```
 
-### 2. Chat Flow
+### 2. Chat Flow (Agentic Architecture)
 
-```
-User sends message → FastAPI /chat endpoint
-→ Check session memory (CHAT_MEMORY dict)
-→ If new disease detected: reset memory + inject disease context
-→ LangGraph router_agent analyzes query
-→ Route to: chat_agent | retriever_agent | web_agent
-→ If RAG: grader_answer_agent evaluates relevance
-→ If insufficient: fallback to web_agent
-→ Return final answer to user
-```
+The chat system uses a **multi-agent LangGraph workflow** for intelligent query processing and response generation:
 
-### 3. Agent Routing Logic
+#### Workflow Steps
 
-- **chat_agent**: Greetings, casual conversation, non-technical queries
-- **retriever_agent (RAG)**: Disease-specific questions, treatment, symptoms, scientific info
-- **web_agent**: Out-of-domain queries, latest news, general agriculture questions
-- **grader_agent**: Validates RAG answers, triggers web fallback if needed
+1. **Router Agent** (Decision Node)
+   - Classifies incoming user query into three categories: `CHAT`, `RAG`, or `WEB`
+   - Routes chat/greeting queries directly to Chat Agent
+   - Directs disease/treatment questions to Retriever Agent (RAG)
+   - Routes general/out-of-domain questions to Web Search Agent
+   - Decision logic: Intent classification + keyword matching
+
+2. **Chat Agent** (Conversational Path)
+   - Handles casual greetings and small talk
+   - Provides contextual responses without external knowledge
+   - Returns responses immediately for chat-only queries
+   - Maintains conversational tone and user engagement
+
+3. **Retriever Agent** (RAG Path)
+   - Retrieves relevant knowledge from **FAISS vector store** via Retriever Tool
+   - Searches across 10 PDF documents covering 6 major tomato diseases
+   - Performs semantic similarity search (k=4 documents by default)
+   - Passes retrieved context to Grader Agent for quality evaluation
+
+4. **Grader Agent** (Answer Quality Check)
+   - Evaluates whether retrieved context adequately answers the user's question
+   - Binary decision: `YES` (sufficient context) or `NO` (insufficient context)
+   - If `YES`: Proceeds to Answer Generator with RAG context
+   - If `NO`: Falls back to Web Search Agent for supplementary information
+
+5. **Web Search Agent** (Fallback Path)
+   - Executes Tavily web search for queries not covered by knowledge base
+   - Retrieves up-to-date information from the internet
+   - Used when RAG retrieval is insufficient
+   - Combines web results with original query for answer generation
+
+6. **Answer Generator** (Response Node)
+   - Synthesizes final response using:
+     - Original user query
+     - Retrieved RAG context (if available)
+     - Web search results (if used)
+     - Disease-specific conversation context (if applicable)
+   - Generates clear, concise, and actionable responses
+   - Returns response to user via FastAPI chat endpoint
+
+#### Architecture Diagram
+
+![alt text](agent_architecture/architecture.png)
+
+#### Key Features
+
+- **Conditional Routing**: Dynamic workflow based on query classification
+- **Fallback Mechanism**: RAG → Web Search → Answer Generation chain
+- **Context Injection**: Detected disease information automatically included in conversation
+- **State Management**: Maintains conversation state across agent nodes
+- **Efficiency**: Chat-only queries skip RAG/Web to minimize latency
 
 ### 4. Memory Management
 
@@ -299,14 +344,15 @@ User sends message → FastAPI /chat endpoint
 ### 5. Knowledge Base
 
 The FAISS vector store is built from 10 PDF documents covering:
+
 - Late Blight (2 papers)
-- Early Blight (2 papers)  
+- Early Blight (2 papers)
 - Bacterial Spot (2 papers)
 - Leaf Mold (1 paper)
 - Target Spot (2 papers)
 - General tomato disease research (1 paper)
 
-Embeddings: **HuggingFace all-MiniLM-L6-v2** (384 dimensions)  
+Embeddings: **HuggingFace all-MiniLM-L6-v2** (384 dimensions)
 Retriever: **FAISS** with similarity search (k=4 default)
 
 ### 6. Disease Classes Supported
@@ -327,73 +373,73 @@ Each disease has tailored treatment recommendations in `vision/inference.py`.
 
 ### Detection Issues
 
-**Problem**: Detection endpoint returns error or no detections  
-**Solutions**:
+**Problem**: Detection endpoint returns error or no detections**Solutions**:
+
 - Verify model file exists at `models/tomato_leaf_disease_detector_v1.pt`
 - Ensure uploaded image is valid JPG/PNG format
 - Check image dimensions (YOLOv11 handles various sizes, but very small images may fail)
 - Review logs in FastAPI terminal for YOLO errors
 
-**Problem**: Annotated image not displaying  
-**Solutions**:
+**Problem**: Annotated image not displaying**Solutions**:
+
 - Verify `api/static/outputs/` directory exists and is writable
 - Check FastAPI static file mounting in `api/main.py`
 - Ensure frontend `API_URL` in `frontend/services/` points to correct backend
 
 ### Chat Issues
 
-**Problem**: Chat endpoint returns 500 error  
-**Solutions**:
+**Problem**: Chat endpoint returns 500 error**Solutions**:
+
 - Confirm backend is running: `fastapi dev ./api/main.py`
 - Verify `.env` has `OPENROUTER_API_KEY` set correctly
 - Check API_URL in `frontend/config.py` (default: http://127.0.0.1:8000)
 - Review backend terminal for LangGraph/LLM errors
 
-**Problem**: Chat responses are empty or irrelevant  
-**Solutions**:
+**Problem**: Chat responses are empty or irrelevant**Solutions**:
+
 - Check FAISS index exists: `faiss_db/index.faiss`
 - Rebuild FAISS: `rm -rf faiss_db/` then restart backend
 - Verify PDF files exist in `context/` directory
 - Check `TAVILY_API_KEY` for web search fallback
 
-**Problem**: Memory not persisting across refreshes  
-**Solutions**:
+**Problem**: Memory not persisting across refreshes**Solutions**:
+
 - Verify `session_id` is being generated and passed correctly
 - Check Streamlit session state in `frontend/state.py`
 - Clear browser cache/cookies and restart Streamlit
 
 ### Model Loading Issues
 
-**Problem**: YOLOv11 model fails to load  
-**Solutions**:
+**Problem**: YOLOv11 model fails to load**Solutions**:
+
 - Reinstall ultralytics: `pip install --upgrade ultralytics`
 - Verify model file is not corrupted (YOLOv11 Large is typically 40-50MB)
 - Check disk space and read permissions
 - Ensure Ultralytics version supports YOLO11: `pip show ultralytics`
 
-**Problem**: FAISS index build fails  
-**Solutions**:
+**Problem**: FAISS index build fails**Solutions**:
+
 - Verify all PDFs in `context/` are readable
 - Check sentence-transformers installation: `pip install --upgrade sentence-transformers`
 - Ensure sufficient RAM (at least 2GB free for embeddings)
 
 ### Environment Issues
 
-**Problem**: Import errors or module not found  
-**Solutions**:
+**Problem**: Import errors or module not found**Solutions**:
+
 - Activate virtual environment: `source .venv/bin/activate`
 - Reinstall requirements: `pip install -r requirements.txt`
 - Clear Python cache: `find . -type d -name __pycache__ -exec rm -rf {} +`
 
-**Problem**: Port already in use (8000 or 8501)  
-**Solutions**:
+**Problem**: Port already in use (8000 or 8501)**Solutions**:
+
 - Kill existing process: `lsof -ti:8000 | xargs kill -9` (or 8501 for Streamlit)
 - Use alternative ports: `uvicorn api.main:app --port 8001` or `streamlit run frontend/app.py --server.port 8502`
 
 ### Performance Issues
 
-**Problem**: Slow inference or chat responses  
-**Solutions**:
+**Problem**: Slow inference or chat responses**Solutions**:
+
 - YOLOv11: Use GPU if available (check CUDA installation), or use smaller variant (11n/11s)
 - FAISS: Reduce retrieval `k` value in `tools/retriever_tool.py`
 - LLM: Use faster model (adjust `core/llm.py` to gpt-3.5-turbo)
@@ -450,11 +496,13 @@ Each disease has tailored treatment recommendations in `vision/inference.py`.
 ## 📚 References & Citations
 
 ### Research Papers (in context/)
+
 - Target Spot: 9068_SE_S9_Target-Spot-of-Tomato.pdf
 - General Research: s41685-022-00264-5.pdf
 - Late Blight, Early Blight, Bacterial Spot, Leaf Mold: Various academic PDFs
 
 ### Technologies
+
 - **YOLO**: Ultralytics YOLOv11 Large - https://github.com/ultralytics/ultralytics
 - **LangChain**: https://python.langchain.com/
 - **LangGraph**: https://langchain-ai.github.io/langgraph/
@@ -477,6 +525,7 @@ Contributions are welcome! Please follow these guidelines:
 ### Development Setup
 
 Follow the setup instructions above, then:
+
 - Install dev dependencies: `pip install pytest black flake8`
 - Run tests: `pytest tests/`
 - Format code: `black .`
@@ -503,6 +552,7 @@ MIT License - See LICENSE file for details (update if using a different license)
 ## 📞 Contact & Support
 
 For issues, questions, or contributions:
+
 - Create an issue on GitHub
 - Email: [your-email@example.com]
 - Documentation: See `docs/` folder
