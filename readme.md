@@ -4,6 +4,8 @@ A production-ready AI system combining computer vision and conversational AI for
 
 Check this out: https://neuroleaf.streamlit.app/
 
+Kaggle model training notebook: https://www.kaggle.com/code/sanilawijesekara/tomato-leaf-disease-detection-yolov11-eda
+
 ---
 
 ## 📦 What's Inside
