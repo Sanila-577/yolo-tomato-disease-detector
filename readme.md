@@ -280,40 +280,45 @@ User uploads image → FastAPI /detect endpoint
 
 The chat system uses a **multi-agent LangGraph workflow** for intelligent query processing and response generation:
 
+#### Architecture Diagram
+
+![alt text](agent_architecture/architecture.png)
+
 #### Workflow Steps
 
 1. **Router Agent** (Decision Node)
+
    - Classifies incoming user query into three categories: `CHAT`, `RAG`, or `WEB`
    - Routes chat/greeting queries directly to Chat Agent
    - Directs disease/treatment questions to Retriever Agent (RAG)
    - Routes general/out-of-domain questions to Web Search Agent
    - Decision logic: Intent classification + keyword matching
-
 2. **Chat Agent** (Conversational Path)
+
    - Handles casual greetings and small talk
    - Provides contextual responses without external knowledge
    - Returns responses immediately for chat-only queries
    - Maintains conversational tone and user engagement
-
 3. **Retriever Agent** (RAG Path)
+
    - Retrieves relevant knowledge from **FAISS vector store** via Retriever Tool
    - Searches across 10 PDF documents covering 6 major tomato diseases
    - Performs semantic similarity search (k=4 documents by default)
    - Passes retrieved context to Grader Agent for quality evaluation
-
 4. **Grader Agent** (Answer Quality Check)
+
    - Evaluates whether retrieved context adequately answers the user's question
    - Binary decision: `YES` (sufficient context) or `NO` (insufficient context)
    - If `YES`: Proceeds to Answer Generator with RAG context
    - If `NO`: Falls back to Web Search Agent for supplementary information
-
 5. **Web Search Agent** (Fallback Path)
+
    - Executes Tavily web search for queries not covered by knowledge base
    - Retrieves up-to-date information from the internet
    - Used when RAG retrieval is insufficient
    - Combines web results with original query for answer generation
-
 6. **Answer Generator** (Response Node)
+
    - Synthesizes final response using:
      - Original user query
      - Retrieved RAG context (if available)
@@ -321,10 +326,6 @@ The chat system uses a **multi-agent LangGraph workflow** for intelligent query 
      - Disease-specific conversation context (if applicable)
    - Generates clear, concise, and actionable responses
    - Returns response to user via FastAPI chat endpoint
-
-#### Architecture Diagram
-
-![alt text](agent_architecture/architecture.png)
 
 #### Key Features
 
