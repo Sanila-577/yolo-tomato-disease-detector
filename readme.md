@@ -29,7 +29,7 @@ The frontend is a modern, interactive Streamlit application that provides users 
 
 - Python 3.10+
 - Virtual environment activated
-- Backend FastAPI server running (http://localhost:8000)
+- Backend FastAPI server running (deployed in hugging face spaces at [https://sanila-wijesekara-neuro-leaf-backend.hf.space](https://sanila-wijesekara-neuro-leaf-backend.hf.space) )
 - All dependencies installed from `requirements.txt`
 
 ### Start Frontend
@@ -38,9 +38,7 @@ The frontend is a modern, interactive Streamlit application that provides users 
 streamlit run app.py
 ```
 
-**Frontend URL**: http://localhost:8501
-
----
+**Frontend URL**: [https://neuroleaf.streamlit.app/](https://neuroleaf.streamlit.app/)
 
 ## 📊 File Documentation
 
@@ -255,7 +253,8 @@ def save_persisted_state(...)         # Save data to cache
 
 **Configuration**:
 
-- Backend URL: Retrieved from Streamlit secrets or defaults to `http://localhost:8000`
+- Backend URL: Retrieved from Streamlit secrets or defaults to `http://localhost:8000` (for local development)
+- Production URL: `https://sanila-wijesekara-neuro-leaf-backend.hf.space`
 - Allows flexible deployment (dev/prod)
 
 **Main Function**: `chat_backend(message, disease, session_id="default", report=None)`
@@ -311,7 +310,8 @@ def save_persisted_state(...)         # Save data to cache
 
 **Configuration**:
 
-- Backend URL: Retrieved from Streamlit secrets or defaults to `http://localhost:8000`
+- Backend URL: Retrieved from Streamlit secrets or defaults to `http://localhost:8000` (for local development)
+- Production URL: `https://sanila-wijesekara-neuro-leaf-backend.hf.space`
 - Timeout: 30 seconds for image processing
 
 **Main Function**: `detect_disease(image_file)`
@@ -369,8 +369,11 @@ Content-Type: image/jpeg
 Create `.streamlit/secrets.toml` in project root:
 
 ```toml
-BACKEND_URL = "http://localhost:8000"  # Development
-# BACKEND_URL = "http://production-api.example.com"  # Production
+# Production (Deployed on Streamlit Cloud)
+BACKEND_URL = "https://sanila-wijesekara-neuro-leaf-backend.hf.space"
+
+# Development (Local)
+# BACKEND_URL = "http://localhost:8000"
 ```
 
 ### Streamlit Configuration (`config.toml`)
@@ -653,19 +656,28 @@ See `requirements.txt` for full dependency list.
 streamlit run app.py
 ```
 
-### Production (Docker)
+### Production
+
+**Frontend**: Deployed on [Streamlit Cloud](https://streamlit.io/cloud)
+
+**Backend**: Deployed on [Hugging Face Spaces](https://huggingface.co/spaces)
+
+- Backend URL: `https://sanila-wijesekara-neuro-leaf-backend.hf.space`
+
+### Docker Deployment
 
 See `Dockerfile` for containerized deployment
 
 ### Secrets Management
 
 - `.streamlit/secrets.toml`: Local secrets (git-ignored)
-- Production: Use Streamlit Cloud secrets or environment variables
+- Production: Use Streamlit Cloud secrets dashboard
+- Backend URL: Configure in Streamlit Cloud secrets as `BACKEND_URL = "https://sanila-wijesekara-neuro-leaf-backend.hf.space"`
 
 ### Backend URL Configuration
 
 - Development: `http://localhost:8000`
-- Production: Use secrets file or environment variable
+- Production: `https://sanila-wijesekara-neuro-leaf-backend.hf.space` (configured in Streamlit Cloud)
 
 ---
 
@@ -673,7 +685,11 @@ See `Dockerfile` for containerized deployment
 
 ### Issue: "Connection refused" (Backend not running)
 
-**Solution**: Start FastAPI backend: `fastapi dev ./api/main.py`
+**Solution**:
+
+- For development: Start FastAPI backend locally: `fastapi dev ./api/main.py`
+- For production: Verify backend is running at https://sanila-wijesekara-neuro-leaf-backend.hf.space
+- Check that `BACKEND_URL` is correctly configured in `.streamlit/secrets.toml` or Streamlit Cloud secrets
 
 ### Issue: Images not displaying
 
