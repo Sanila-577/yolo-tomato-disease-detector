@@ -16,6 +16,8 @@ This document describes the agentic workflow built with LangGraph for the Neuro 
 
 ## 🔄 Complete Agent Flow
 
+![alt text](../agent_architecture/architecture.png)
+
 ## 📋 Agent Descriptions
 
 ### 1. Router Agent
@@ -203,24 +205,6 @@ else if information is insufficient/incomplete:
 ---
 
 ## 🔄 Fallback Mechanism
-
-```mermaid
-graph LR
-    A["🌱 User Query:<br/>Disease Question"] --> B["🔄 Router<br/>route: RAG"]
-    B --> C["📚 Retriever Agent<br/>Searches FAISS<br/>10 PDFs"]
-    C --> D["⚖️ Grader Agent<br/>Evaluates Relevance"]
-    D -->|"✅ Sufficient Info"| E["💡 Answer Generator<br/>Return RAG Answer"]
-    D -->|"❌ Insufficient Info"| F["🌐 Web Agent<br/>Tavily Search"]
-    F --> G["💡 Answer Generator<br/>Return Web + RAG Answer"]
-    E --> H["✅ Response to User"]
-    G --> H
-  
-    style A fill:#90EE90
-    style H fill:#FFB6C1
-    style D fill:#FFD700
-    style E fill:#87CEEB
-    style G fill:#FFA07A
-```
 
 **Example Scenario - Automatic Fallback**:
 
