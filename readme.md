@@ -80,55 +80,6 @@ def save_persisted_state(...)         # Save data to cache
 
 ---
 
-### `state.py` - Session State Management
-
-**Purpose**: Manage Streamlit session state and cross-refresh persistence
-
-**Key Components**:
-
-#### `_get_or_set_query_session_id()`
-
-- Generates or retrieves stable session ID
-- Stored in URL query params (`?sid=...`)
-- Survives browser refresh without loss of state
-- Returns: UUID hex string
-
-#### `get_persistent_store()`
-
-- Cached resource for in-memory store
-- Dictionary keyed by session ID
-- Persists data while app is running
-- Returns: `Dict[str, Dict[str, Any]]`
-
-#### `load_persisted_state(session_id)`
-
-- Retrieves cached data for session
-- Returns: `Optional[Dict]` with keys `detection_result` and `chat_history`
-- Used on app initialization to restore previous state
-
-#### `save_persisted_state(session_id, detection_result, chat_history)`
-
-- Saves detection and chat data to cache
-- Called after detection or each chat message
-- Enables state recovery on page refresh
-
-#### `init_state()`
-
-- Initializes all required session state variables
-- Sets defaults for new sessions
-- Called at app startup in `app.py`
-
-**State Variables Managed**:
-
-| Variable             | Type        | Purpose                            |
-| -------------------- | ----------- | ---------------------------------- |
-| `session_id`       | str         | Unique identifier for user session |
-| `detected_disease` | str\| None  | Current detected disease           |
-| `detection_result` | dict\| None | Full detection API response        |
-| `chat_history`     | list        | Chat message history               |
-
----
-
 ### `components/chat_ui.py` - Chat Interface
 
 **Purpose**: Display and manage chat interaction with disease context
@@ -142,32 +93,6 @@ def save_persisted_state(...)         # Save data to cache
 - First message tracking for context injection
 
 **Main Function**: `chat_ui(disease: str)`
-
-**Parameters**:
-
-- `disease`: Detected disease name (passed from detection result)
-
-**Process**:
-
-1. Display subheader "Ask about the disease"
-2. Initialize/retrieve chat history from session state
-3. Render all previous messages using `st.chat_message()`
-4. Provide input box with `st.chat_input()`
-5. On user input:
-   - Display user message immediately
-   - Call `chat_backend()` API with session context
-   - Display assistant response
-   - Append to local chat history
-   - Save state to persistent store
-
-**Key Variables**:
-
-- `history_key`: "chat_history" - session state key
-- `session_id`: From session state
-- `is_first`: Tracked per session+disease combo
-- `detection_result`: Full report sent with first message
-
----
 
 ### `components/detection_view.py` - Detection Visualization
 
@@ -184,21 +109,6 @@ def save_persisted_state(...)         # Save data to cache
 - Result caching for refresh handling
 
 **Main Function**: `show_detection(image_file=None, cached_result=None)`
-
-**Parameters**:
-
-- `image_file`: Streamlit UploadedFile object
-- `cached_result`: Previous detection result (for refresh)
-
-**Process**:
-
-1. Check if using cached result or new detection
-2. If cached: render from cache without API call
-3. If new: call `detect_disease()` API
-4. Call `_render_detection()` helper
-5. Return detection payload
-
-**Helper Function**: `_render_detection(result: dict)`
 
 **Renders** (in order):
 
@@ -259,31 +169,6 @@ def save_persisted_state(...)         # Save data to cache
 
 **Main Function**: `chat_backend(message, disease, session_id="default", report=None)`
 
-**Parameters**:
-
-- `message` (str): User's chat message
-- `disease` (str): Detected disease name
-- `session_id` (str): Session identifier for memory
-- `report` (dict): Full detection report (sent with first message)
-
-**Returns**: `Tuple[str, str]`
-
-- `response`: Assistant's answer
-- `stored_disease`: Confirmed disease from backend
-
-**Process**:
-
-1. Check if first message for this session+disease combo
-2. Build JSON payload with:
-   - User message
-   - Detected disease context
-   - Full detection report
-   - Session ID
-   - First message flag
-3. POST to `/chat` endpoint
-4. Handle HTTP errors and JSON decode errors
-5. Return response data
-
 **Payload Structure**:
 
 ```python
@@ -312,36 +197,8 @@ def save_persisted_state(...)         # Save data to cache
 
 - Backend URL: Retrieved from Streamlit secrets or defaults to `http://localhost:8000` (for local development)
 - Production URL: `https://sanila-wijesekara-neuro-leaf-backend.hf.space`
-- Timeout: 30 seconds for image processing
 
 **Main Function**: `detect_disease(image_file)`
-
-**Parameters**:
-
-- `image_file`: Streamlit UploadedFile object
-
-**Returns**: `dict`
-
-- Full detection API response
-
-**Process**:
-
-1. Extract image bytes from Streamlit UploadedFile
-2. Get filename and content type
-3. Build multipart form data
-4. POST to `/detect` endpoint with 30-second timeout
-5. Parse and return JSON response
-
-**Multipart Form Data**:
-
-```
---boundary
-Content-Disposition: form-data; name="file"; filename="leaf.jpg"
-Content-Type: image/jpeg
-
-[binary image data]
---boundary--
-```
 
 **Returns Response Structure**:
 
@@ -352,15 +209,6 @@ Content-Type: image/jpeg
     "report": {...}
 }
 ```
-
-**Error Handling**:
-
-- HTTPError: Attempts to extract server error details
-- ValueError: Reports JSON decode errors
-- Timeout: Uses 30-second timeout to prevent hanging
-- Comprehensive error messages for debugging
-
----
 
 ## 🔧 Configuration
 
@@ -374,25 +222,6 @@ BACKEND_URL = "https://sanila-wijesekara-neuro-leaf-backend.hf.space"
 
 # Development (Local)
 # BACKEND_URL = "http://localhost:8000"
-```
-
-### Streamlit Configuration (`config.toml`)
-
-Create `.streamlit/config.toml`:
-
-```toml
-[theme]
-primaryColor = "#1f77b4"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f2f6"
-textColor = "#262730"
-
-[client]
-showErrorDetails = true
-maxUploadSize = 200  # MB
-
-[server]
-maxUploadSize = 200
 ```
 
 ---
@@ -489,46 +318,6 @@ State saved to persistent store
    - User/Assistant message differentiation
    - Chat input box
    - Real-time message streaming
-
----
-
-## 🧪 Testing the Frontend
-
-### Test Detection Upload
-
-```python
-# Use a real tomato leaf image
-# Should see:
-# - Annotated image
-# - Disease name
-# - Confidence > 0%
-# - Treatment advice
-```
-
-### Test Chat Interaction
-
-```python
-# After detection, ask:
-# - "What causes [disease]?"
-# - "How do I treat it?"
-# - "Prevention tips?"
-# - Casual questions
-```
-
-### Test Session Persistence
-
-```python
-# 1. Upload image + chat
-# 2. Refresh page (F5)
-# Expected: Previous detection and chat history restored
-```
-
-### Test Fallback Behavior
-
-```python
-# Ask out-of-domain question in chat
-# Expected: Router → web agent → answer from web search
-```
 
 ---
 
