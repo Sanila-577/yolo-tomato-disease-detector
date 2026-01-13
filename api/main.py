@@ -12,7 +12,11 @@ app = FastAPI(
 
 @app.get("/")
 async def root():
-    return {"messege": "Hello World"}
+    return {
+        "service": "Tomato Leaf Disease Detection API",
+        "status": "running",
+        "version": "1.0.0"
+        }
 
 app.include_router(health_router) # Register the router
 app.include_router(detect_router)
