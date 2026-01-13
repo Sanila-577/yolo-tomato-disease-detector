@@ -412,11 +412,12 @@ The knowledge base contains 10 research papers covering major tomato leaf diseas
 #### Late Blight (2 papers)
 
 1. **Late Blight of Tomato** - Kelly Ivors
+
    - File: `late_blight1.pdf`
    - Focus: Pathogen biology and management strategies for *Phytophthora infestans*
    - Key topics: Host crops, disease transmission, cultural and fungicide control
-
 2. **Late Blight Fact Sheet** - WVU Extension Service
+
    - File: `late_blight2.pdf`
    - Focus: Practical control methods and disease basics
    - Key topics: Disease spread from infected plants, prevention strategies
@@ -424,11 +425,12 @@ The knowledge base contains 10 research papers covering major tomato leaf diseas
 #### Early Blight (2 papers)
 
 3. **Early Blight Control Guide** - Sharon M. Douglas, CAES
+
    - File: `early_blight1.pdf`
    - Focus: Symptom identification and management approaches
    - Key topics: Concentric lesions on leaves and fruit, disease progression
-
 4. **Tomato Early Blight** - Gearhart & Sunshine (CMG GardenNotes #718)
+
    - File: `early_blight2.pdf`
    - Focus: Comprehensive management guide for home and commercial growers
    - Key topics: Caused by *Alternaria solani* and *Alternaria tomatophila*; management practices including spacing, mulching, rotation, and fungicide options
@@ -436,12 +438,13 @@ The knowledge base contains 10 research papers covering major tomato leaf diseas
 #### Bacterial Spot (2 papers)
 
 5. **Bacterial Spot of Tomato and Pepper** - Xiaoan Sun, Misty C. Nielsen, John W. Miller
+
    - File: `bacterial_spot1.pdf`
    - Source: Florida Department of Agriculture & Consumer Services, Plant Pathology Circular No. 129 (Revised, April/May 2002)
    - Focus: Disease caused by *Xanthomonas* spp. and its management
    - Key topics: Serious disease on tomato and pepper worldwide, destructive to seedlings
-
 6. **Bacterial Spot of Tomato** - Dr. Yonghao Li, CAES
+
    - File: `bacterial_spot2.pdf`
    - Source: Connecticut Agricultural Experiment Station
    - Focus: Visual identification and management strategies
@@ -457,16 +460,17 @@ The knowledge base contains 10 research papers covering major tomato leaf diseas
 #### Target Spot (3 papers)
 
 8. **Target Spot of Tomato** - Seminis (Agronomic Spotlight)
+
    - File: `9068_SE_S9_Target-Spot-of-Tomato.pdf`
    - Focus: Disease overview and management in tropical/subtropical regions
    - Key topics: Caused by *Corynespora cassiicola*; important disease in warm climates; symptoms may resemble bacterial spot and early blight
-
 9. **Tomato Target Spot** - FAO Fact Sheet #163
+
    - File: `target_spot1.pdf`
    - Focus: Global distribution and control strategies
    - Key topics: Widespread in tropical regions; rapid leaf damage in wet weather; wind-driven rain spore dispersal; cultural control measures
-
 10. **Climate Change Impacts on Paddy Yields in Sri Lanka** - Chamila Kumari Chandrasiri et al.
+
     - File: `s41685-022-00264-5.pdf`
     - Source: Asia-Pacific Journal of Regional Science (2023) 7:455–489
     - Focus: Environmental factors affecting crop yields
@@ -514,9 +518,7 @@ Follow the setup instructions above, then:
 
 ## 📄 License
 
-MIT License - See LICENSE file for details (update if using a different license).
-
----
+MIT License - See LICENSE file for details
 
 ## 🙏 Acknowledgments
 
@@ -533,7 +535,7 @@ MIT License - See LICENSE file for details (update if using a different license)
 For issues, questions, or contributions:
 
 - Create an issue on GitHub
-- Email: [your-email@example.com]
+- Email: [sanilamethwan@gmail.com]
 - Documentation: See `docs/` folder
 
 ---
