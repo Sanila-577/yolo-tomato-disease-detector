@@ -370,82 +370,6 @@ Each disease has tailored treatment recommendations in `vision/inference.py`.
 
 ---
 
-## 🔎 Troubleshooting
-
-### Detection Issues
-
-**Problem**: Detection endpoint returns error or no detections**Solutions**:
-
-- Verify model file exists at `models/tomato_leaf_disease_detector_v1.pt`
-- Ensure uploaded image is valid JPG/PNG format
-- Check image dimensions (YOLOv11 handles various sizes, but very small images may fail)
-- Review logs in FastAPI terminal for YOLO errors
-
-**Problem**: Annotated image not displaying**Solutions**:
-
-- Verify `api/static/outputs/` directory exists and is writable
-- Check FastAPI static file mounting in `api/main.py`
-- Ensure frontend `API_URL` in `frontend/services/` points to correct backend
-
-### Chat Issues
-
-**Problem**: Chat endpoint returns 500 error**Solutions**:
-
-- Confirm backend is running: `fastapi dev ./api/main.py`
-- Verify `.env` has `OPENROUTER_API_KEY` set correctly
-- Check API_URL in `frontend/config.py` (default: http://127.0.0.1:8000)
-- Review backend terminal for LangGraph/LLM errors
-
-**Problem**: Chat responses are empty or irrelevant**Solutions**:
-
-- Check FAISS index exists: `faiss_db/index.faiss`
-- Rebuild FAISS: `rm -rf faiss_db/` then restart backend
-- Verify PDF files exist in `context/` directory
-- Check `TAVILY_API_KEY` for web search fallback
-
-**Problem**: Memory not persisting across refreshes**Solutions**:
-
-- Verify `session_id` is being generated and passed correctly
-- Check Streamlit session state in `frontend/state.py`
-- Clear browser cache/cookies and restart Streamlit
-
-### Model Loading Issues
-
-**Problem**: YOLOv11 model fails to load**Solutions**:
-
-- Reinstall ultralytics: `pip install --upgrade ultralytics`
-- Verify model file is not corrupted (YOLOv11 Large is typically 40-50MB)
-- Check disk space and read permissions
-- Ensure Ultralytics version supports YOLO11: `pip show ultralytics`
-
-**Problem**: FAISS index build fails**Solutions**:
-
-- Verify all PDFs in `context/` are readable
-- Check sentence-transformers installation: `pip install --upgrade sentence-transformers`
-- Ensure sufficient RAM (at least 2GB free for embeddings)
-
-### Environment Issues
-
-**Problem**: Import errors or module not found**Solutions**:
-
-- Activate virtual environment: `source .venv/bin/activate`
-- Reinstall requirements: `pip install -r requirements.txt`
-- Clear Python cache: `find . -type d -name __pycache__ -exec rm -rf {} +`
-
-**Problem**: Port already in use (8000 or 8501)**Solutions**:
-
-- Kill existing process: `lsof -ti:8000 | xargs kill -9` (or 8501 for Streamlit)
-- Use alternative ports: `uvicorn api.main:app --port 8001` or `streamlit run frontend/app.py --server.port 8502`
-
-### Performance Issues
-
-**Problem**: Slow inference or chat responses**Solutions**:
-
-- YOLOv11: Use GPU if available (check CUDA installation), or use smaller variant (11n/11s)
-- FAISS: Reduce retrieval `k` value in `tools/retriever_tool.py`
-- LLM: Use faster model (adjust `core/llm.py` to gpt-3.5-turbo)
-- Streamlit: Disable automatic reruns in settings
-
 ---
 
 ## 🏗️ Architecture Decisions
@@ -479,28 +403,82 @@ Each disease has tailored treatment recommendations in `vision/inference.py`.
 
 ---
 
-## 🚀 Future Enhancements
-
-- [ ] PostgreSQL integration for persistent chat history
-- [ ] Redis caching for FAISS query results
-- [ ] Multi-language support (Spanish, Hindi, Chinese)
-- [ ] Mobile-responsive UI redesign
-- [ ] Real-time detection via webcam/camera feed
-- [ ] Export chat history as PDF report
-- [ ] Disease progression tracking over time
-- [ ] Integration with weather APIs for environmental risk factors
-- [ ] Batch image processing for large-scale diagnosis
-- [ ] Fine-tuned LLM specifically for agriculture domain
-
----
-
 ## 📚 References & Citations
 
 ### Research Papers (in context/)
 
-- Target Spot: 9068_SE_S9_Target-Spot-of-Tomato.pdf
-- General Research: s41685-022-00264-5.pdf
-- Late Blight, Early Blight, Bacterial Spot, Leaf Mold: Various academic PDFs
+The knowledge base contains 10 research papers covering major tomato leaf diseases:
+
+#### Late Blight (2 papers)
+
+1. **Late Blight of Tomato** - Kelly Ivors
+   - File: `late_blight1.pdf`
+   - Focus: Pathogen biology and management strategies for *Phytophthora infestans*
+   - Key topics: Host crops, disease transmission, cultural and fungicide control
+
+2. **Late Blight Fact Sheet** - WVU Extension Service
+   - File: `late_blight2.pdf`
+   - Focus: Practical control methods and disease basics
+   - Key topics: Disease spread from infected plants, prevention strategies
+
+#### Early Blight (2 papers)
+
+3. **Early Blight Control Guide** - Sharon M. Douglas, CAES
+   - File: `early_blight1.pdf`
+   - Focus: Symptom identification and management approaches
+   - Key topics: Concentric lesions on leaves and fruit, disease progression
+
+4. **Tomato Early Blight** - Gearhart & Sunshine (CMG GardenNotes #718)
+   - File: `early_blight2.pdf`
+   - Focus: Comprehensive management guide for home and commercial growers
+   - Key topics: Caused by *Alternaria solani* and *Alternaria tomatophila*; management practices including spacing, mulching, rotation, and fungicide options
+
+#### Bacterial Spot (2 papers)
+
+5. **Bacterial Spot of Tomato and Pepper** - Xiaoan Sun, Misty C. Nielsen, John W. Miller
+   - File: `bacterial_spot1.pdf`
+   - Source: Florida Department of Agriculture & Consumer Services, Plant Pathology Circular No. 129 (Revised, April/May 2002)
+   - Focus: Disease caused by *Xanthomonas* spp. and its management
+   - Key topics: Serious disease on tomato and pepper worldwide, destructive to seedlings
+
+6. **Bacterial Spot of Tomato** - Dr. Yonghao Li, CAES
+   - File: `bacterial_spot2.pdf`
+   - Source: Connecticut Agricultural Experiment Station
+   - Focus: Visual identification and management strategies
+   - Key topics: Brown spots with yellow halos on leaves, symptoms on stems and petioles
+
+#### Leaf Mold (1 paper)
+
+7. **Leaf Mold in High Tunnel Tomatoes** - ClintonED
+   - File: `leaf_mold1.pdf`
+   - Focus: Disease management in controlled greenhouse environments
+   - Key topics: Caused by *Fulvia fulva* (formerly *Cladosporium fulvum*); favored by high humidity; rapid plant-to-plant spread; severe defoliation and yield reduction
+
+#### Target Spot (3 papers)
+
+8. **Target Spot of Tomato** - Seminis (Agronomic Spotlight)
+   - File: `9068_SE_S9_Target-Spot-of-Tomato.pdf`
+   - Focus: Disease overview and management in tropical/subtropical regions
+   - Key topics: Caused by *Corynespora cassiicola*; important disease in warm climates; symptoms may resemble bacterial spot and early blight
+
+9. **Tomato Target Spot** - FAO Fact Sheet #163
+   - File: `target_spot1.pdf`
+   - Focus: Global distribution and control strategies
+   - Key topics: Widespread in tropical regions; rapid leaf damage in wet weather; wind-driven rain spore dispersal; cultural control measures
+
+10. **Climate Change Impacts on Paddy Yields in Sri Lanka** - Chamila Kumari Chandrasiri et al.
+    - File: `s41685-022-00264-5.pdf`
+    - Source: Asia-Pacific Journal of Regional Science (2023) 7:455–489
+    - Focus: Environmental factors affecting crop yields
+    - Key topics: Regional climate variations and agricultural productivity; relevant context for disease management under changing environmental conditions
+
+#### Knowledge Base Statistics
+
+- **Total documents**: 10 PDFs
+- **Embedding model**: HuggingFace `all-MiniLM-L6-v2` (384 dimensions)
+- **Vector store**: FAISS with k=4 default retrieval
+- **Coverage**: 7 disease classes (Late Blight, Early Blight, Bacterial Spot, Leaf Mold, Target Spot, Black Spot, Healthy)
+- **Focus**: Primarily academic and extension service publications from US institutions and industry sources
 
 ### Technologies
 
