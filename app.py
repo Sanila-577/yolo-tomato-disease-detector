@@ -1,6 +1,4 @@
 import streamlit as st
-import os
-from PIL import Image
 from state import (
     init_state,
     load_persisted_state,
@@ -36,36 +34,6 @@ if persisted and not st.session_state.get("detection_result"):
 
 
 # ----------------------------
-# Sidebar - Sample Images
-# ----------------------------
-st.sidebar.title("Sample Images")
-st.sidebar.caption("Select a sample tomato leaf")
-
-SAMPLE_DIR = "samples"
-
-sample_image = None
-if os.path.exists(SAMPLE_DIR):
-    sample_files = [
-        f for f in os.listdir(SAMPLE_DIR)
-        if f.lower().endswith((".jpg", ".jpeg", ".png"))
-    ]
-
-    if sample_files:
-        selected_sample = st.sidebar.radio(
-            "Choose a sample",
-            sample_files
-        )
-
-        sample_path = os.path.join(SAMPLE_DIR, selected_sample)
-        sample_image = Image.open(sample_path)
-
-        st.sidebar.image(
-            sample_image,
-            caption=selected_sample,
-            use_container_width=True
-        )
-
-# ----------------------------
 # App Title
 # ----------------------------
 st.title("Tomato leaf disease detection")
@@ -78,19 +46,8 @@ uploaded_image = st.file_uploader(
     type=["jpg", "png", "jpeg"]
 )
 
-input_image = None
-image_source = None
-
 if uploaded_image:
-    input_image = uploaded_image
-    image_source = "Uploaded Image"
-elif sample_image:
-    input_image = sample_image
-    image_source = "Sample Image"
-
-if input_image:
-    st.subheader(image_source)
-    detection_result = show_detection(image_file=input_image)
+    detection_result = show_detection(image_file=uploaded_image)
 
     if detection_result:
         detected_disease = (
@@ -98,6 +55,7 @@ if input_image:
             or (detection_result.get("report", {}) or {}).get("primary_diagnosis")
         )
 
+        # Save detection + reset chat
         st.session_state["detected_disease"] = detected_disease
         st.session_state["detection_result"] = detection_result
 
@@ -107,10 +65,10 @@ if input_image:
             st.session_state["chat_history"],
         )
 
-        if detected_disease:
-            chat_ui(detected_disease)
+        chat_ui(detected_disease)
 
 elif st.session_state.get("detection_result"):
+    # Rehydrate UI if refresh happens
     detection_result = st.session_state["detection_result"]
     detected_disease = (
         detection_result.get("detected_disease")
