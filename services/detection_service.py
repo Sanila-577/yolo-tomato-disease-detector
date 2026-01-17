@@ -13,7 +13,7 @@ def detect_disease(image_file):
         content_type = getattr(image_file, "type", None) or "image/jpeg"
 
         files = {"file": (filename, file_bytes, content_type)}
-        res = requests.post(f"{BACKEND_URL}/detect", files=files, timeout=30)
+        res = requests.post(f"{BACKEND_URL}/detect", files=files, timeout=300)
         res.raise_for_status()
         return res.json()
     except requests.HTTPError as e:
