@@ -4,6 +4,10 @@ from api.routes.chat import router as chat_router
 from api.routes.detect import router as detect_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+# Load environment variables from a local .env file if present.
+load_dotenv()
 
 app = FastAPI(
     title="Tomato plant disease detection",
